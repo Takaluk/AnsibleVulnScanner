@@ -1,0 +1,5 @@
+---
+# main.yml에서 다른 태스크 파일들을 명시적으로 호출
+# 예시:
+#- name: linux_u01
+#  include_tasks: linux_u01.yml
