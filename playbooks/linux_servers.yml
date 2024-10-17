@@ -1,0 +1,6 @@
+---
+- hosts: linux_servers
+  become: yes
+  roles:
+    - linux_role
+
