@@ -9,8 +9,6 @@
     scan_results: {}
 - name: linux_u01
   include_tasks: linux_u01.yml
-- name: linux_u02
-  include_tasks: linux_u02.yml
 - name: Display scan_results
   debug:
     var: scan_results
