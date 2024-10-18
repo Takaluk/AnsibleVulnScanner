@@ -3,3 +3,9 @@
 # 예시:
 #- name: linux_u01
 #  include_tasks: linux_u01.yml
+#
+- name: Set var for linux_role
+  set_fact:
+    scan_results: {}
+- name: linux_u01
+  include_tasks: linux_u01.yml

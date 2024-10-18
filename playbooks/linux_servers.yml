@@ -1,5 +1,5 @@
 ---
-- hosts: linux_servers
+- hosts: linux_server_1
   become: yes
   roles:
     - linux_role
