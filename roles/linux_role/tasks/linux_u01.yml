@@ -22,8 +22,5 @@
       }}
 
 - name: Set scan_results based on all conditions
-  scan_results: "{{ scan_results | combine({'u01': all_conditions | bool}) }}"
-
-- name: Display scan_results # 작성 완료 후 삭제
-  debug:
-    var: scan_results
+  set_fact:
+    scan_results: "{{ scan_results | combine({'u01': all_conditions | bool}) }}"
