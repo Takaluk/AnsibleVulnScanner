@@ -1,3 +1,5 @@
+* 파일 구조
+```
 AnsibleVulnScanner
 ├── playbooks/
 │   ├── main.yml                   # 메인 플레이북
@@ -14,3 +16,8 @@ AnsibleVulnScanner
 │   │   │   ├── main.yml            # 윈도우용 작업 정의
 │   │   ├── vars/
 │   │   │   ├── main.yml            # 윈도우용 변수 정의
+```
+* 플레이북 실행
+```
+ansible-playbook playbooks/main.yml
+```
