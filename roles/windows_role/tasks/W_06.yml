@@ -1,0 +1,21 @@
+---
+- name: Check Windows password age policy
+  hosts: windows
+  gather_facts: no
+  tasks:
+    - name: Get all user accounts
+      win_shell: |
+        Get-LocalUser | Select-Object Name, PasswordNeverExpires | ConvertTo-Json
+      register: user_accounts
+
+    - name: Parse user accounts
+      set_fact:
+        user_password_policy: "{{ user_accounts.stdout | from_json }}"
+
+    - name: Display results
+      debug:
+        msg: >
+          {% for user in user_password_policy %}
+          User: {{ user.Name }} - Password Never Expires: {{ user.PasswordNeverExpires | bool }}
+          {% endfor %}
+

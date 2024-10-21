@@ -1,0 +1,26 @@
+---
+- name: Check specific Windows services
+  hosts: windows
+  tasks:
+    - name: Get the list of running services
+      win_shell: net start
+      register: running_services
+
+    - name: Set fact for vulnerable services
+      set_fact:
+        vulnerable_services: >-
+          {%- set services = [] -%}
+          {%- if 'Alerter' in running_services.stdout -%} {% set services = services + ['Alerter'] %} {% endif -%}
+          {%- if 'Clipbook' in running_services.stdout -%} {% set services = services + ['Clipbook'] %} {% endif -%}
+          {%- if 'Messenger' in running_services.stdout -%} {% set services = services + ['Messenger'] %} {% endif -%}
+          {%- if 'Simple TCP/IP Services' in running_services.stdout -%} {% set services = services + ['Simple TCP/IP Services'] %} {% endif -%}
+          {{ services | join(', ') }}
+
+    - name: Determine overall status
+      set_fact:
+        status: "{{ 'VULNERABLE' if vulnerable_services != '' else 'SAFE' }}"
+
+    - name: Report the status
+      debug:
+        msg: "Service status: {{ status }}. Vulnerable services: {{ vulnerable_services | default('None') }}"
+

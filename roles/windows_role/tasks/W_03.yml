@@ -1,0 +1,24 @@
+---
+- name: Check for Unnecessary Accounts
+  hosts: windows
+  gather_facts: no
+  tasks:
+    - name: Check for unnecessary accounts
+      win_shell: |
+        $defaultAccounts = @( 'Administrator', 'Guest', 'DefaultAccount', 'WDAGUtilityAccount')  # 기본 계정 목록
+        $existingAccounts = Get-LocalUser | Where-Object { $_.Name -notin $defaultAccounts }
+        if ($existingAccounts) {
+            Write-Host "vulnerable"
+        } else {
+            Write-Host "healthy"
+        }
+      register: account_check
+
+    - name: Output account check result
+      debug:
+        msg: >
+          {% if account_check.stdout == 'healthy' %}
+          The system is healthy: No unnecessary accounts found.
+          {% else %}
+          The system is vulnerable: Unnecessary accounts found.
+          {% endif %}
