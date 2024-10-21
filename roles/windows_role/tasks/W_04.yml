@@ -1,0 +1,26 @@
+---
+- name: Export Security Settings to INF file
+  win_command: secedit /export /cfg C:\Windows\Temp\secconfig.inf
+  register: secedit_export
+
+- name: Read INF file to get LockoutThreshold
+  win_shell: |
+    $content = Get-Content C:\Windows\Temp\secconfig.inf
+    $threshold = ($content -match '^LockoutBadCount\s*=\s*(\d+)')[0] -replace '^LockoutBadCount\s*=\s*', ''
+    Write-Output $threshold
+  register: lockout_threshold
+  failed_when: lockout_threshold.rc != 0 or lockout_threshold.stdout == ''
+
+- name: Initialize scan_results
+  set_fact:
+    scan_results: {}
+
+- name: Determine if lockout threshold is 5 or less
+  set_fact:
+    scan_results: "{{ scan_results | combine({'U_04': (lockout_threshold.stdout | int) <= 5}) }}"
+
+- name: Clean up INF file
+  win_file:
+    path: C:\Windows\Temp\secconfig.inf
+    state: absent
+

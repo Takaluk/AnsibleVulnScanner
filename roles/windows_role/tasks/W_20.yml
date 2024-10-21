@@ -1,0 +1,11 @@
+---
+- name: Check for the latest HotFixes
+  win_updates:
+    category_names: ['CriticalUpdates', 'SecurityUpdates']
+    state: searched
+  register: update_check
+
+- name: Determine if latest HotFixes are installed
+  set_fact:
+    scan_results: "{{ scan_results | combine({'latest_hotfix_installed': (update_check.updates | length == 0)}) }}"
+

@@ -1,1 +1,13 @@
 ---
+# main.yml에서 다른 태스크 파일들을 명시적으로 호출
+# 예시:
+#- name: windows_u01
+#  include_tasks: windows_u01.yml
+- name: Set var for windows_role
+  set_fact:
+    scan_results: {}
+- name: W_32
+  include_tasks: W_32.yml
+- name: Display scan_results
+  debug:
+    var: scan_results

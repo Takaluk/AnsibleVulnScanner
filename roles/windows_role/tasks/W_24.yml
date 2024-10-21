@@ -1,0 +1,4 @@
+---
+- name: Antivirus softwar Installed
+  set_fact:
+    scan_results: "{{ scan_results | combine({'W_24': none}) }}"
