@@ -7,5 +7,5 @@
 
 - name: Determine if latest HotFixes are installed
   set_fact:
-    scan_results: "{{ scan_results | combine({'latest_hotfix_installed': (update_check.updates | length == 0)}) }}"
+    scan_results: "{{ scan_results | combine({'W_20': (update_check.updates | length == 0)}) }}"
 

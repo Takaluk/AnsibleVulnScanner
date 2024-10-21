@@ -6,8 +6,50 @@
 - name: Set var for windows_role
   set_fact:
     scan_results: {}
+
+- name: W_19
+  include_tasks: W_19.yml
+
+- name: W_20
+  include_tasks: W_20.yml
+
+- name: W_21
+  include_tasks: W_21.yml
+
+- name: W_22
+  include_tasks: W_22.yml
+
+- name: W_23
+  include_tasks: W_23.yml
+
+- name: W_24
+  include_tasks: W_24.yml
+
+- name: W_25
+  include_tasks: W_25.yml
+
+- name: W_26
+  include_tasks: W_26.yml
+
+- name: W_27
+  include_tasks: W_27.yml
+
+- name: W_28
+  include_tasks: W_28.yml
+
+- name: W_29
+  include_tasks: W_29.yml
+
+- name: W_30
+  include_tasks: W_30.yml
+
+- name: W_31
+  include_tasks: W_31.yml
+
 - name: W_32
   include_tasks: W_32.yml
+
 - name: Display scan_results
   debug:
     var: scan_results
+
