@@ -1,0 +1,22 @@
+---
+- name: Get ShutdownWithoutLogon registry value
+  win_shell: |
+    try {
+      $value = Get-ItemProperty -Path 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'ShutdownWithoutLogon'
+      Write-Output $value.ShutdownWithoutLogon
+    } catch {
+      Write-Output "NotFound"
+    }
+  register: shutdown_without_logon
+
+- name: Determine if ShutdownWithoutLogon is 0
+  set_fact:
+    scan_results: >-
+      {{
+        scan_results | combine({
+          'W_27': (
+            shutdown_without_logon.stdout == '0'
+          )
+        })
+      }}
+

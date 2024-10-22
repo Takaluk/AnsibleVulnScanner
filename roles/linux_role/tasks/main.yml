@@ -1,6 +1,7 @@
 - name: Set var for linux_role
   set_fact:
     scan_results: {}
+
 - name: U_01
   include_tasks: U_01.yml
 
@@ -92,7 +93,13 @@
   include_tasks: U_35.yml
 - name: U_36
   include_tasks: U_36.yml
-
-- name: Display scan_results
-  debug:
-    var: scan_results
+- name: Write scan_results to a file on the control node
+  local_action:
+    module: copy
+    content: |
+      {
+        "hostname": "{{ inventory_hostname }}",
+        "scan_results": {{ scan_results | to_nice_json }}
+      }
+    dest: "/AnsibleVulnScanner/scan_results/{{ inventory_hostname }}_scan_results.json"
+  delegate_to: localhost

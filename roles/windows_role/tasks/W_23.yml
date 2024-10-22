@@ -1,0 +1,11 @@
+---
+- name: Check if Remote Registry Service is stopped
+  win_service:
+    name: RemoteRegistry
+    state: stopped
+  register: remote_registry_status
+
+- name: Determine if Remote Registry Service is stopped
+  set_fact:
+    scan_results: "{{ scan_results | combine({'W_23': (remote_registry_status.state == 'stopped')}) }}"
+

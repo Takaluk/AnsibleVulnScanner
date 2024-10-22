@@ -1,0 +1,22 @@
+---
+- name: Get local security policy for "Shut down the system"
+  win_shell: |
+    secedit /export /cfg C:\Windows\Temp\secpol.cfg
+    Select-String -Path C:\Windows\Temp\secpol.cfg -Pattern "SeRemoteShutdownPrivilege"
+  register: shutdown_policy
+
+- name: Determine if only Administrators have the policy
+  set_fact:
+    scan_results: >-
+      {{
+        scan_results | combine({
+          'W_28': (
+            shutdown_policy.stdout | regex_search('^SeRemoteShutdownPrivilege = BUILTIN\\Administrators$') is not none
+          )
+        })
+      }}
+
+- name: Clean up exported policy file
+  win_file:
+    path: C:\Windows\Temp\secpol.cfg
+    state: absent

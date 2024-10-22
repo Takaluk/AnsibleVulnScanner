@@ -1,0 +1,23 @@
+---
+- name: Get "Shutdown Security audit cannot be logged" policy value
+  win_shell: |
+    secedit /export /cfg C:\Windows\Temp\secpol.cfg
+    Select-String -Path C:\Windows\Temp\secpol.cfg -Pattern "CrashOnAuditFail"
+  register: audit_policy
+
+- name: Determine if the policy is set to "No"
+  set_fact:
+    scan_results: >-
+      {{
+        scan_results | combine({
+          'W_29': (
+            audit_policy.stdout | regex_search('CrashOnAuditFail = 0') is not none
+          )
+        })
+      }}
+
+- name: Clean up exported policy file
+  win_file:
+    path: C:\Windows\Temp\secpol.cfg
+    state: absent
+

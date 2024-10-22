@@ -1,4 +1,17 @@
 ---
-- import_playbook: linux_servers.yml
-- import_playbook: windows_servers.yml
-
+- name: Apply roles based on OS
+  hosts: all
+  gather_facts: yes
+  tasks:
+    - name: Gather OS information
+      setup:
+      
+    - name: Apply Linux role for RedHat and Debian
+      include_role:
+        name: linux_role
+      when: ansible_facts['os_family'] == "RedHat" or ansible_facts['os_family'] == "Debian"
+        
+    - name: Apply Windows role
+      include_role:
+        name: windows_role
+      when: ansible_facts['os_family'] == "Windows"
