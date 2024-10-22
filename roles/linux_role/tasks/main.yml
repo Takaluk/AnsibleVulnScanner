@@ -20,4 +20,3 @@
       }
     dest: "/AnsibleVulnScanner/scan_results/{{ inventory_hostname }}_scan_results.json"
   delegate_to: localhost
-
