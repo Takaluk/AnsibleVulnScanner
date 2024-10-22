@@ -1,0 +1,37 @@
+- name: Check if Sendmail is running
+  ansible.builtin.shell: ps -ef | grep sendmail | grep -v grep || true
+  register: sendmail_status
+  ignore_errors: yes
+
+- name: Check Sendmail PrivacyOptions for restrictqrun
+  ansible.builtin.shell: cat /etc/mail/sendmail.cf | grep PrivacyOptions || true
+  register: sendmail_privacyoptions
+  when: sendmail_status.stdout != ''
+  ignore_errors: yes
+
+- name: Check Postfix file permissions and ownership
+  ansible.builtin.stat:
+    path: /usr/sbin/postfix
+  register: postfix_permissions
+  ignore_errors: yes
+
+- name: Check Postfix group users
+  ansible.builtin.shell: getent group postfix || true
+  register: postfix_group_users
+  ignore_errors: yes
+
+- name: Evaluate restrictqrun status for Sendmail and Postfix
+  set_fact:
+    restrictqrun_applied: >-
+      {{
+        (sendmail_status.stdout == '' or 
+         sendmail_privacyoptions.stdout is search('restrictqrun')) or
+        (postfix_permissions.stat.exists and
+         postfix_permissions.stat.mode == '0750' and
+         'root' in postfix_group_users.stdout and
+         'postfix' not in postfix_group_users.stdout)
+      }}
+
+- name: Set scan_results based on restrictqrun status
+  set_fact:
+    scan_results: "{{ scan_results | combine({'U_32': restrictqrun_applied}) }}"

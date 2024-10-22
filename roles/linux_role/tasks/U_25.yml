@@ -1,0 +1,29 @@
+  - name: Check NFS export list for everyone access
+    ansible.builtin.shell: showmount -e localhost || true
+    register: nfs_export_status
+    ignore_errors: yes
+
+  - name: Check /etc/exports for insecure access control
+    ansible.builtin.shell: cat /etc/exports || true
+    register: exports_status
+    ignore_errors: yes
+
+  - name: Evaluate NFS export status
+    set_fact:
+      everyone_mount: "{{ 'everyone' in nfs_export_status.stdout }}"
+
+  - name: Evaluate /etc/exports for insecure configuration
+    set_fact:
+      insecure_exports: "{{ exports_status.stdout is search('\\*\\(ro|rw,all_squash\\)') }}"
+
+  - name: Evaluate all conditions for NFS access control
+    set_fact:
+      all_conditions: >-
+        {{
+          not everyone_mount and
+          not insecure_exports
+        }}
+
+  - name: Set scan_results based on NFS access control status
+    set_fact:
+      scan_results: "{{ scan_results | combine({'U_25': all_conditions | bool}) }}"

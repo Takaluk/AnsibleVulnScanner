@@ -1,0 +1,37 @@
+- name: Check if /etc/crontab exists
+  stat:
+    path: /etc/crontab
+  register: crontab_stat
+
+- name: Check for log backup job in /etc/crontab
+  shell: "grep -Ei '(backup|log)' /etc/crontab"
+  register: log_backup_crontab
+  when: crontab_stat.stat.exists
+  failed_when: false
+
+- name: Check if logrotate configuration exists
+  stat:
+    path: /etc/logrotate.conf
+  register: logrotate_conf_stat
+
+- name: Check if logrotate is configured to manage logs
+  shell: "grep -Ei 'rotate|weekly|monthly|daily' /etc/logrotate.conf"
+  register: logrotate_check
+  when: logrotate_conf_stat.stat.exists
+  failed_when: false
+
+- name: Set initial log check status to false (default unsafe)
+  set_fact:
+    log_check_status: false
+
+- name: Set log check status to true if backup and rotation are properly configured
+  set_fact:
+    log_check_status: true
+  when: (log_backup_crontab.stdout is defined and log_backup_crontab.stdout != "") and
+        (logrotate_check.stdout is defined and logrotate_check.stdout != "")
+
+- name: Set scan_results based on log management check
+  set_fact:
+    scan_results: "{{ scan_results | combine({
+                      'U_36': log_check_status | bool
+                    }) }}"

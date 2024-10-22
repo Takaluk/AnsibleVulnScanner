@@ -1,0 +1,15 @@
+- name: Check NFS service status
+  ansible.builtin.shell: systemctl is-active nfsd || true
+  register: nfsd_status
+
+- name: Evaluate NFS service status
+  set_fact:
+    nfsd_service_disabled: "{{ nfsd_status.stdout != 'active' }}"
+
+- name: Evaluate all conditions
+  set_fact:
+    all_conditions: "{{ nfsd_service_disabled }}"
+
+- name: Set scan_results based on NFS service status
+  set_fact:
+    scan_results: "{{ scan_results | combine({'U_24': all_conditions | bool}) }}"

@@ -1,0 +1,35 @@
+- name: Check if named.conf exists in /etc or /etc/bind
+  stat:
+    path: /etc/named.conf
+  register: named_conf_stat
+
+- name: Check if named.conf exists in /etc/bind if not found in /etc
+  stat:
+    path: /etc/bind/named.conf
+  register: bind_named_conf_stat
+  when: named_conf_stat.stat.exists == false
+
+- name: Determine the named configuration file to use
+  set_fact:
+    named_conf_file: "{{ '/etc/named.conf' if named_conf_stat.stat.exists else '/etc/bind/named.conf' }}"
+  when: named_conf_stat.stat.exists or bind_named_conf_stat.stat.exists
+
+- name: Initialize DNS zone transfer check to true (safe by default)
+  set_fact:
+    dns_zone_transfer_check: true
+
+- name: Check for allow-transfer settings in named.conf
+  shell: "grep -i 'allow-transfer' {{ named_conf_file }}"
+  register: allow_transfer_setting
+  when: named_conf_file is defined
+
+- name: Set DNS zone transfer check to false if zone transfer is allowed to all
+  set_fact:
+    dns_zone_transfer_check: false
+  when: allow_transfer_setting.stdout is defined and (allow_transfer_setting.stdout == "" or "any" in allow_transfer_setting.stdout.lower())
+
+- name: Set scan_results based on DNS zone transfer check
+  set_fact:
+    scan_results: "{{ scan_results | combine({
+                      'U_34': dns_zone_transfer_check | bool
+                    }) }}"

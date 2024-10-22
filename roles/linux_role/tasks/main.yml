@@ -1,13 +1,6 @@
----
-# main.yml에서 다른 태스크 파일들을 명시적으로 호출
-# 예시:
-#- name: linux_u01
-#  include_tasks: linux_u01.yml
-#
 - name: Set var for linux_role
   set_fact:
     scan_results: {}
-
 - name: U_01
   include_tasks: U_01.yml
 
@@ -64,6 +57,41 @@
 
 - name: U_19
   include_tasks: U_19.yml
+  
+- name: U_20
+  include_tasks: U_20.yml
+- name: U_21
+  include_tasks: U_21.yml
+- name: U_22
+  include_tasks: U_22.yml
+- name: U_23
+  include_tasks: U_23.yml
+- name: U_24
+  include_tasks: U_24.yml
+- name: U_25
+  include_tasks: U_25.yml
+- name: U_26
+  include_tasks: U_26.yml
+- name: U_27
+  include_tasks: U_27.yml
+- name: U_28
+  include_tasks: U_28.yml
+- name: U_29
+  include_tasks: U_29.yml
+- name: U_30
+  include_tasks: U_30.yml
+- name: U_31
+  include_tasks: U_31.yml
+- name: U_32
+  include_tasks: U_32.yml
+- name: U_33
+  include_tasks: U_33.yml
+- name: U_34
+  include_tasks: U_34.yml
+- name: U_35
+  include_tasks: U_35.yml
+- name: U_36
+  include_tasks: U_36.yml
 
 - name: Display scan_results
   debug:
