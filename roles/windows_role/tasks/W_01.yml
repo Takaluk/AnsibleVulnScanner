@@ -1,0 +1,22 @@
+- name: Check Windows Administrator Account Naming
+  hosts: windows
+  gather_facts: no
+  tasks:
+    - name: Check for Administrator account name
+      win_shell: |
+        $adminAccount = Get-LocalUser | Where-Object { $_.Name -eq 'Administrator' }
+        if ($adminAccount) {
+            Write-Host "취약"
+        } else {
+            Write-Host "양호"
+        }
+      register: admin_check
+
+    - name: Output result
+      debug:
+        msg: >
+          {% if admin_check.stdout == 'healthy' %}
+          The system is healthy: Administrator account name has been changed.
+          {% else %}
+          The system is vulnerable: Administrator account name is still 'Administrator'.
+          {% endif %}

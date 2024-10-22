@@ -1,0 +1,26 @@
+---
+- name: Export Security Settings to INF file
+  win_command: secedit /export /cfg C:\Windows\Temp\secconfig.inf
+  register: secedit_export
+
+- name: Read INF file to get MaximumPasswordAge
+  win_shell: |
+    $content = Get-Content C:\Windows\Temp\secconfig.inf
+    $max_password_age = ($content -match '^MaximumPasswordAge\s*=\s*(\d+)')[0] -replace '^MaximumPasswordAge\s*=\s*', ''
+    Write-Output $max_password_age
+  register: max_password_age
+  failed_when: max_password_age.rc != 0 or max_password_age.stdout == ''
+
+- name: Initialize scan_results
+  set_fact:
+    scan_results: {}
+
+- name: Determine if MaximumPasswordAge is 90 or less
+  set_fact:
+    scan_results: "{{ scan_results | combine({'U_05': (max_password_age.stdout | int) <= 90}) }}"
+
+- name: Clean up INF file
+  win_file:
+    path: C:\Windows\Temp\secconfig.inf
+    state: absent
+
