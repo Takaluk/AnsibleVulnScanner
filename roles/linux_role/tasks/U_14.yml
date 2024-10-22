@@ -1,0 +1,17 @@
+- name: Find all files in /bin with SUID or SGID set
+  shell: find /bin -perm /6000
+  register: suid_sgid_files
+
+- name: Check if any files have SUID or SGID set
+  set_fact:
+    suid_sgid_check: "{{ suid_sgid_files.stdout == '' }}"
+
+- name: Set scan_results based on SUID and SGID check for major executables
+  set_fact:
+    scan_results: "{{ scan_results | combine({
+                      'U_14': suid_sgid_check | bool
+                    }) }}"
+
+- name: Display scan_results
+  debug:
+    var: scan_results

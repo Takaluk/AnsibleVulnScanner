@@ -7,8 +7,64 @@
 - name: Set var for linux_role
   set_fact:
     scan_results: {}
-- name: linux_u01
-  include_tasks: linux_u01.yml
+
+- name: U_01
+  include_tasks: U_01.yml
+
+- name: U_02
+  include_tasks: U_02.yml
+
+- name: U_03
+  include_tasks: U_03.yml
+
+- name: U_04
+  include_tasks: U_04.yml
+
+- name: U_05
+  include_tasks: U_05.yml
+
+- name: U_06
+  include_tasks: U_06.yml
+
+- name: U_07
+  include_tasks: U_07.yml
+
+- name: U_08
+  include_tasks: U_08.yml
+
+- name: U_09
+  include_tasks: U_09.yml
+
+- name: U_10
+  include_tasks: U_10.yml
+
+- name: U_11
+  include_tasks: U_11.yml
+
+- name: U_12
+  include_tasks: U_12.yml
+
+- name: U_13
+  include_tasks: U_13.yml
+
+- name: U_14
+  include_tasks: U_14.yml
+
+- name: U_15
+  include_tasks: U_15.yml
+
+- name: U_16
+  include_tasks: U_16.yml
+
+- name: U_17
+  include_tasks: U_17.yml
+
+- name: U_18
+  include_tasks: U_18.yml
+
+- name: U_19
+  include_tasks: U_19.yml
+
 - name: Display scan_results
   debug:
     var: scan_results

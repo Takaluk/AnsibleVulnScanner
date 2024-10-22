@@ -1,0 +1,39 @@
+- name: Check if /etc/hosts.equiv exists
+  stat:
+    path: /etc/hosts.equiv
+  register: hosts_equiv_stat
+
+- name: Find all .rhosts files in home directories
+  shell: "find /home -maxdepth 2 -type f -name '.rhosts'"
+  register: rhosts_files
+
+- name: Set initial hosts.equiv and rhosts check status to true
+  set_fact:
+    hosts_rhosts_check: true
+
+- name: Check ownership, permissions, and content of /etc/hosts.equiv if it exists
+  set_fact:
+    hosts_rhosts_check: false
+  when: hosts_equiv_stat.stat.exists and (hosts_equiv_stat.stat.pw_name != 'root' or hosts_equiv_stat.stat.mode | int(base=8) > 600 or '+' in lookup('file', '/etc/hosts.equiv'))
+
+- name: Check ownership, permissions, and content of each .rhosts file if they exist
+  stat:
+    path: "{{ item }}"
+  loop: "{{ rhosts_files.stdout_lines }}"
+  register: rhosts_files_stat
+
+- name: Validate each .rhosts file for correct ownership, permissions, and no '+'
+  set_fact:
+    hosts_rhosts_check: false
+  loop: "{{ rhosts_files_stat.results }}"
+  when: item.stat.exists and (item.stat.pw_name not in [item.stat.path.split('/')[2], 'root'] or item.stat.mode | int(base=8) > 600 or '+' in lookup('file', item.stat.path))
+
+- name: Set scan_results based on hosts.equiv and rhosts file check
+  set_fact:
+    scan_results: "{{ scan_results | combine({
+                      'U_17': hosts_rhosts_check | bool
+                    }) }}"
+
+- name: Display scan_results
+  debug:
+    var: scan_results

@@ -1,0 +1,22 @@
+- name: Find all world writable files in the root directory
+  shell: "find / -xdev -type f -perm -0002 ! -perm -1000 2>/dev/null"
+  register: world_writable_files
+
+- name: Set initial world writable file check status to true
+  set_fact:
+    world_writable_check: true
+
+- name: Check if there are any world writable files and validate their justification
+  set_fact:
+    world_writable_check: false
+  when: world_writable_files.stdout != ""
+
+- name: Set scan_results based on world writable file check
+  set_fact:
+    scan_results: "{{ scan_results | combine({
+                      'U_16': world_writable_check | bool
+                    }) }}"
+
+- name: Display scan_results
+  debug:
+    var: scan_results

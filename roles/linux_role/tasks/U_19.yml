@@ -1,0 +1,50 @@
+---
+- name: Check if /etc/crontab exists
+  stat:
+    path: /etc/crontab
+  register: crontab_stat
+
+- name: Check if /etc/cron.allow exists
+  stat:
+    path: /etc/cron.allow
+  register: cron_allow_stat
+
+- name: Check if /etc/cron.deny exists
+  stat:
+    path: /etc/cron.deny
+  register: cron_deny_stat
+
+- name: Determine which cron file to check (/etc/crontab, /etc/cron.allow, or /etc/cron.deny)
+  set_fact:
+    cron_file: >-
+      {{
+        '/etc/crontab' if crontab_stat.stat.exists else
+        '/etc/cron.allow' if cron_allow_stat.stat.exists else
+        '/etc/cron.deny' if cron_deny_stat.stat.exists else None
+      }}
+  when: crontab_stat.stat.exists or cron_allow_stat.stat.exists or cron_deny_stat.stat.exists
+
+- name: Check ownership and permissions of the selected cron file
+  stat:
+    path: "{{ cron_file }}"
+  register: selected_cron_stat
+  when: crontab_stat.stat.exists or cron_allow_stat.stat.exists or cron_deny_stat.stat.exists
+
+- name: Check if ownership is root and permissions are 640 or less for the selected cron file
+  set_fact:
+    cron_owner_permission_check: >-
+      {{
+        selected_cron_stat.stat.pw_name == 'root' and
+        selected_cron_stat.stat.mode | int(base=8) <= 640
+      }}
+  when: crontab_stat.stat.exists or cron_allow_stat.stat.exists or cron_deny_stat.stat.exists
+
+- name: Set scan_results based on cron file ownership and permission check
+  set_fact:
+    scan_results: "{{ scan_results | combine({
+                      'U_19': (cron_owner_permission_check | bool) if (crontab_stat.stat.exists or cron_allow_stat.stat.exists or cron_deny_stat.stat.exists) else false
+                    }) }}"
+
+- name: Display scan_results
+  debug:
+    var: scan_results
