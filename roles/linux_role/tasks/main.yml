@@ -65,7 +65,6 @@
 - name: U_19
   include_tasks: U_19.yml
 
-
 - name: Display scan_results
   debug:
     var: scan_results
