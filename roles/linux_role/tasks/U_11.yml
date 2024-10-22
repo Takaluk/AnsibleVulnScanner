@@ -1,0 +1,37 @@
+- name: Check if /etc/inetd.conf exists
+  stat:
+    path: /etc/inetd.conf
+  register: inetd_stat
+
+- name: Check if /etc/xinetd.conf exists
+  stat:
+    path: /etc/xinetd.conf
+  register: xinetd_stat
+
+- name: Determine which file to check (/etc/inetd.conf or /etc/xinetd.conf)
+  set_fact:
+    inetd_file: "{{ '/etc/inetd.conf' if inetd_stat.stat.exists else '/etc/xinetd.conf' }}"
+  when: inetd_stat.stat.exists or xinetd_stat.stat.exists
+
+- name: Check ownership and permissions of the selected inetd file
+  stat:
+    path: "{{ inetd_file }}"
+  register: selected_inetd_stat
+  when: inetd_stat.stat.exists or xinetd_stat.stat.exists
+
+- name: Check if ownership is root and permissions are 644 or less for inetd or xinetd file
+  set_fact:
+    inetd_owner_permission_check: >-
+      {{
+        selected_inetd_stat.stat.pw_name == 'root' and
+        selected_inetd_stat.stat.mode | int(base=8) <= 644
+      }}
+  when: inetd_stat.stat.exists or xinetd_stat.stat.exists
+
+- name: Set scan_results based on inetd/xinetd file ownership and permission check
+  set_fact:
+    scan_results: "{{ scan_results | combine({
+                      'U_11': (inetd_owner_permission_check | bool) if (inetd_stat.stat.exists or xinetd_stat.stat.exists) else false
+                    }) }}"
+
+

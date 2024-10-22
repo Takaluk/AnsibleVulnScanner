@@ -23,4 +23,3 @@
   win_file:
     path: C:\Windows\Temp\secconfig.inf
     state: absent
-

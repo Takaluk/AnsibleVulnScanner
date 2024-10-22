@@ -1,0 +1,40 @@
+---
+- name: Check Windows Administrators group for unnecessary accounts
+  hosts: windows
+  tasks:
+    - name: Get current logged-in user
+      win_shell: |
+        (Get-WmiObject -Class Win32_ComputerSystem).UserName
+      register: current_user
+
+    - name: Get Administrators group members
+      win_shell: |
+        Get-LocalGroupMember -Group "Administrators" | Select-Object -ExpandProperty Name
+      register: admin_members
+
+    - name: Determine if unnecessary accounts exist
+      set_fact:
+        status: >-
+          {%- if 'Administrators' in admin_members.stdout -%}
+            {%- set extra_accounts = admin_members.stdout -%}
+            {%- set current_user_name = current_user.stdout.split('\\')[-1] -%}
+            {%- set current_user_domain = current_user.stdout.split('\\')[0] -%}
+            {%- set valid_accounts = ['Administrators', current_user_name] -%}
+            {%- for account in extra_accounts -%}
+              {%- if account not in valid_accounts -%}
+                {%- set _ = extra_accounts.append(account) -%}
+              {%- endif -%}
+            {%- endfor -%}
+            {%- if extra_accounts|length > 2 -%}
+              "VULNERABLE"
+            {%- else -%}
+              "SAFE"
+            {%- endif -%}
+          {%- else -%}
+            "SAFE"
+          {%- endif -%}
+
+    - name: Report status
+      debug:
+        msg: "Status of unnecessary accounts: {{ status }}"
+

@@ -1,0 +1,36 @@
+---
+- name: Check Windows shared folders and permissions
+  hosts: windows
+  tasks:
+    - name: Get all shared folders
+      win_shell: net share
+      register: shares
+
+    - name: Check for non-standard shares
+      set_fact:
+        non_standard_shares: "{{ shares.stdout_lines | select('search', '^[A-Za-z]:') | list }}"
+
+    - name: Check if there are non-standard shares
+      set_fact:
+        share_status: "{{ 'SAFE' if non_standard_shares | length == 0 else 'VULNERABLE' }}"
+
+    - name: Report non-standard shares status
+      debug:
+        msg: "Status of non-standard shares: {{ share_status }}"
+
+    - name: Check for Everyone share if non-standard shares exist
+      when: share_status == 'VULNERABLE'
+      win_shell: |
+        net share | findstr /I "Everyone"
+      register: everyone_share
+
+    - name: Determine status of Everyone share
+      set_fact:
+        everyone_share_status: "{{ 'SAFE' if everyone_share.stdout == '' else 'VULNERABLE' }}"
+      when: share_status == 'VULNERABLE'
+
+    - name: Report Everyone share status
+      debug:
+        msg: "Status of Everyone share: {{ everyone_share_status }}"
+      when: share_status == 'VULNERABLE'
+
