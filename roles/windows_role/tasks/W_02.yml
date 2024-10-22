@@ -1,0 +1,24 @@
+---
+- name: Check Windows Guest Account Status
+  hosts: windows
+  gather_facts: no
+  tasks:
+    - name: Check Guest account status
+      win_shell: |
+        $guestAccount = Get-LocalUser -Name 'Guest'
+        if ($guestAccount.Enabled) {
+            Write-Host "vulnerable"
+        } else {
+            Write-Host "healthy"
+        }
+      register: guest_check
+
+    - name: Output result
+      debug:
+        msg: >
+          {% if guest_check.stdout == 'healthy' %}
+          The system is healthy: Guest account is disabled.
+          {% else %}
+          The system is vulnerable: Guest account is enabled.
+          {% endif %}
+

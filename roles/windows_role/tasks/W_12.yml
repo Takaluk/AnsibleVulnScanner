@@ -1,0 +1,22 @@
+---
+- name: Check and set NetBIOS Options
+  hosts: windows
+  tasks:
+    - name: Check current NetBIOS Options
+      win_reg_stat:
+        path: HKLM\SYSTEM\CurrentControlSet\services\NetBT\Parameters\Interfaces
+        name: NetbiosOptions
+      register: netbios_option
+
+    - name: Set NetBIOS Options to 2 if not set
+      win_regedit:
+        path: HKLM\SYSTEM\CurrentControlSet\services\NetBT\Parameters\Interfaces
+        name: NetbiosOptions
+        data: 2
+        type: dword
+      when: netbios_option.value != 2
+
+    - name: Display current NetBIOS Options
+      debug:
+        msg: "Current NetBIOS Options value is {{ netbios_option.value }}"
+

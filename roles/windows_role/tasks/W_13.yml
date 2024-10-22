@@ -1,0 +1,29 @@
+---
+- name: Check FTP service status from net start output
+  hosts: windows
+  tasks:
+    - name: Run net start command and save output to file
+      win_shell: net start | Out-File -FilePath C:\Windows\Temp\services.inf -Encoding UTF8
+      ignore_errors: true
+
+    - name: Read services from the file
+      win_shell: Get-Content C:\Windows\Temp\services.inf
+      register: services_output
+
+    - name: Debug services output
+      debug:
+        var: services_output.stdout_lines
+
+    - name: Check if FTP service is running
+      set_fact:
+        ftp_service_running: "{{ 'true' if 'FTP Server' not in services_output.stdout else 'false' }}"
+
+    - name: Output FTP service status
+      debug:
+        msg: "{{ ftp_service_running }}"
+
+    - name: Remove the services.inf file
+      win_file:
+        path: C:\Windows\Temp\services.inf
+        state: absent
+
