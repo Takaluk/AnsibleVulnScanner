@@ -23,7 +23,7 @@
 
 - name: Set scan_results based on all conditions
   set_fact:
-    scan_results: "{{ scan_results | combine({'u01': all_conditions | bool}) }}"
+    scan_results: "{{ scan_results | combine({'U-01': all_conditions | bool}) }}"
 
 - name: Display scan_results
   debug:

@@ -1,0 +1,41 @@
+  - name: Check if NIS (ypbind) service is active
+    ansible.builtin.shell: systemctl is-active ypbind || true
+    register: ypbind_status
+    ignore_errors: yes
+
+  - name: Check if NIS+ (nisplus) service is active
+    ansible.builtin.shell: systemctl is-active nisplus || true
+    register: nisplus_status
+    ignore_errors: yes
+
+  - name: Evaluate NIS and NIS+ services status
+    set_fact:
+      nis_services_active: "{{ ypbind_status.stdout == 'active' or nisplus_status.stdout == 'active' }}"
+
+  - name: Stop NIS (ypbind) service if active
+    ansible.builtin.systemd:
+      name: ypbind
+      state: stopped
+    when: ypbind_status.stdout == 'active'
+
+  - name: Stop NIS+ (nisplus) service if active
+    ansible.builtin.systemd:
+      name: nisplus
+      state: stopped
+    when: nisplus_status.stdout == 'active'
+
+  - name: Disable NIS (ypbind) service to prevent startup
+    ansible.builtin.systemd:
+      name: ypbind
+      enabled: false
+    when: ypbind_status.stdout == 'active'
+
+  - name: Disable NIS+ (nisplus) service to prevent startup
+    ansible.builtin.systemd:
+      name: nisplus
+      enabled: false
+    when: nisplus_status.stdout == 'active'
+
+  - name: Set scan_results based on NIS and NIS+ service status
+    set_fact:
+      scan_results: "{{ scan_results | combine({'U_28': not nis_services_active}) }}"

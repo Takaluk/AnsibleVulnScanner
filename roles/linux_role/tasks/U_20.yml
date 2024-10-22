@@ -1,0 +1,17 @@
+- name: Check finger service status
+  shell: systemctl is-active finger
+  register: finger_service_status
+  ignore_errors: yes  # finger 서비스가 없을 경우 오류 무시
+
+- name: Evaluate finger service condition
+  set_fact:
+    finger_service_disabled: >-
+      {{
+        ('inactive' in finger_service_status.stdout or 
+         'inactive' in finger_service_status.stderr or 
+         'command not found' in finger_service_status.stderr)
+      }}
+
+- name: Set scan_results based on finger service condition
+  set_fact:
+    scan_results: "{{ scan_results | combine({'U_20': finger_service_disabled}) }}"
