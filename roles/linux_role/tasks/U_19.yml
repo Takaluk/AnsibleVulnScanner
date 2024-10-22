@@ -45,6 +45,3 @@
                       'U_19': (cron_owner_permission_check | bool) if (crontab_stat.stat.exists or cron_allow_stat.stat.exists or cron_deny_stat.stat.exists) else false
                     }) }}"
 
-- name: Display scan_results
-  debug:
-    var: scan_results

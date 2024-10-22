@@ -34,6 +34,3 @@
                       'U_12': (syslog_owner_permission_check | bool) if (rsyslog_stat.stat.exists or syslog_stat.stat.exists) else false
                     }) }}"
 
-- name: Display scan_results
-  debug:
-    var: scan_results

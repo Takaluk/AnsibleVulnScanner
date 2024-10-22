@@ -17,6 +17,3 @@
                       'U_10': hosts_owner_permission_check | bool
                     }) }}"
 
-- name: Display scan_results # 작성 완료 후 삭제 가능
-  debug:
-    var: scan_results
