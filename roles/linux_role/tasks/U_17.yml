@@ -34,6 +34,3 @@
                       'U_17': hosts_rhosts_check | bool
                     }) }}"
 
-- name: Display scan_results
-  debug:
-    var: scan_results

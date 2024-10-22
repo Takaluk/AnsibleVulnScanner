@@ -13,6 +13,4 @@
                       'U_07': not has_invalid_owner_group | bool
                     }) }}"
 
-- name: Display scan_results # 작성 완료 후 삭제 가능
-  debug:
-    var: scan_results
+

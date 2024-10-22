@@ -58,6 +58,3 @@
                       'U_18': ip_port_restriction_check | bool
                     }) }}"
 
-- name: Display scan_results
-  debug:
-    var: scan_results

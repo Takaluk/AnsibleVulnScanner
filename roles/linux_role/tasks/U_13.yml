@@ -17,6 +17,4 @@
                       'U_13': services_owner_permission_check | bool
                     }) }}"
 
-- name: Display scan_results
-  debug:
-    var: scan_results
+

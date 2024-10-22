@@ -38,6 +38,4 @@
                       'PasswordComplexityInPwqualityConf': password_complexity_conditions | bool
                     }) }}"
 
-- name: Display scan_results # 작성 완료 후 삭제
-  debug:
-    var: scan_results
+

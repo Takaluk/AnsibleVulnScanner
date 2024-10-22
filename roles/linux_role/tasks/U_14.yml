@@ -12,6 +12,4 @@
                       'U_14': suid_sgid_check | bool
                     }) }}"
 
-- name: Display scan_results
-  debug:
-    var: scan_results
+

@@ -25,7 +25,4 @@
                       'U_15': env_files_check | bool
                     }) }}"
 
-- name: Display scan_results
-  debug:
-    var: scan_results
 

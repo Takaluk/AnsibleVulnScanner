@@ -17,6 +17,3 @@
                       'U_16': world_writable_check | bool
                     }) }}"
 
-- name: Display scan_results
-  debug:
-    var: scan_results

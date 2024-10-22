@@ -22,6 +22,4 @@
   set_fact:
     scan_results: "{{ scan_results | combine({'U_03': (system_auth_deny.stdout != '') and (password_auth_deny.stdout != '')}) }}"
 
-- name: Display scan_results
-  debug:
-    var: scan_results
+

@@ -34,6 +34,4 @@
                       'U_11': (inetd_owner_permission_check | bool) if (inetd_stat.stat.exists or xinetd_stat.stat.exists) else false
                     }) }}"
 
-- name: Display scan_results
-  debug:
-    var: scan_results
+
