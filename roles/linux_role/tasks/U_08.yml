@@ -1,0 +1,22 @@
+- name: Check ownership and permissions of /etc/passwd
+  stat:
+    path: /etc/passwd
+  register: passwd_stat
+
+- name: Check if /etc/passwd ownership is root and permissions are 644 or less
+  set_fact:
+    passwd_owner_permission_check: >-
+      {{
+        passwd_stat.stat.pw_name == 'root' and
+        (passwd_stat.stat.mode | string | int(base=8)) <= 644
+      }}
+
+- name: Set scan_results based on /etc/passwd ownership and permission check
+  set_fact:
+    scan_results: "{{ scan_results | combine({
+                      'U_08': passwd_owner_permission_check | bool
+                    }) }}"
+
+- name: Display scan_results # 작성 완료 후 삭제 가능
+  debug:
+    var: scan_results

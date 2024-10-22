@@ -1,0 +1,22 @@
+- name: Check ownership and permissions of /etc/hosts
+  stat:
+    path: /etc/hosts
+  register: hosts_stat
+
+- name: Check if /etc/hosts ownership is root and permissions are 644 or less
+  set_fact:
+    hosts_owner_permission_check: >-
+      {{
+        hosts_stat.stat.pw_name == 'root' and
+        (hosts_stat.stat.mode | string | int(base=8)) <= 644
+      }}
+
+- name: Set scan_results based on /etc/hosts ownership and permission check
+  set_fact:
+    scan_results: "{{ scan_results | combine({
+                      'U_10': hosts_owner_permission_check | bool
+                    }) }}"
+
+- name: Display scan_results # 작성 완료 후 삭제 가능
+  debug:
+    var: scan_results

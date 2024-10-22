@@ -1,0 +1,27 @@
+- name: Check if /etc/login.defs exists
+  stat:
+    path: /etc/login.defs
+  register: logindefs_stat
+
+- name: Check PASS_MAX_DAYS in /etc/login.defs if file exists
+  shell: grep -E '^PASS_MAX_DAYS' /etc/login.defs | awk '{print $2}' || echo "not_set"
+  register: pass_max_days
+  when: logindefs_stat.stat.exists
+
+- name: Check if PASS_MAX_DAYS is a valid number and evaluate pass/fail
+  set_fact:
+    pass_max_days_check: >-
+      {{
+        pass_max_days.stdout is search('^[0-9]+$') and
+        (pass_max_days.stdout | int) <= 90
+      }}
+
+- name: Set scan_results based on PASS_MAX_DAYS check
+  set_fact:
+    scan_results: "{{ scan_results | combine({
+                      'U_04': pass_max_days_check | bool
+                    }) }}"
+
+- name: Display scan_results # 작성 완료 후 삭제 가능
+  debug:
+    var: scan_results

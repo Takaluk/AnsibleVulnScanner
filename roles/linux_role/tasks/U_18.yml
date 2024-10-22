@@ -1,0 +1,63 @@
+- name: Check if /etc/hosts.allow exists
+  stat:
+    path: /etc/hosts.allow
+  register: hosts_allow_stat
+
+- name: Check if /etc/hosts.deny exists
+  stat:
+    path: /etc/hosts.deny
+  register: hosts_deny_stat
+
+- name: Check contents of /etc/hosts.allow
+  shell: cat /etc/hosts.allow
+  register: hosts_allow_content
+  when: hosts_allow_stat.stat.exists
+  failed_when: false
+
+- name: Check contents of /etc/hosts.deny
+  shell: cat /etc/hosts.deny
+  register: hosts_deny_content
+  when: hosts_deny_stat.stat.exists
+  failed_when: false
+
+- name: Check iptables settings
+  shell: iptables -nL
+  register: iptables_settings
+  failed_when: false
+
+- name: Check firewall-cmd settings if firewall-cmd is available
+  shell: firewall-cmd --list-all
+  register: firewall_cmd_settings
+  ignore_errors: yes
+  failed_when: false
+
+- name: Initialize IP and port restriction check status to false (default unsafe)
+  set_fact:
+    ip_port_restriction_check: false
+
+- name: Set IP and port restriction check status to true if restrictions are configured properly
+  set_fact:
+    ip_port_restriction_check: true
+  when: >
+    (
+      (hosts_allow_content.stdout is defined and hosts_allow_content.stdout != "") or
+      (hosts_deny_content.stdout is defined and hosts_deny_content.stdout != "")
+    ) or
+    (
+      iptables_settings.stdout is defined and
+      (iptables_settings.stdout.find('ACCEPT') != -1 or iptables_settings.stdout.find('REJECT') != -1)
+    ) or
+    (
+      firewall_cmd_settings.stdout is defined and
+      firewall_cmd_settings.stdout.find('ports:') != -1
+    )
+
+- name: Set scan_results based on IP and port restriction check
+  set_fact:
+    scan_results: "{{ scan_results | combine({
+                      'U_18': ip_port_restriction_check | bool
+                    }) }}"
+
+- name: Display scan_results
+  debug:
+    var: scan_results

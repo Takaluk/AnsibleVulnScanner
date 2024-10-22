@@ -1,0 +1,31 @@
+- name: Find all user environment files (.bashrc, .profile) in /home directories
+  shell: "find /home -maxdepth 2 -type f -name '.bashrc' -o -name '.profile'"
+  register: env_files
+
+- name: Check ownership and permissions of each environment file
+  stat:
+    path: "{{ item }}"
+  loop: "{{ env_files.stdout_lines }}"
+  register: env_files_stat
+
+- name: Set initial environment files check status to true
+  set_fact:
+    env_files_check: true
+
+- name: Validate ownership and permissions of each environment file
+  set_fact:
+    env_files_check: false
+  loop: "{{ env_files_stat.results }}"
+  when: item.stat.exists is defined and item.stat.exists and
+        (item.stat.pw_name not in ['root', item.stat.path.split('/')[-2]] or item.stat.mode | int(base=8) != 644)
+
+- name: Set scan_results based on ownership and permission check for environment files
+  set_fact:
+    scan_results: "{{ scan_results | combine({
+                      'U_15': env_files_check | bool
+                    }) }}"
+
+- name: Display scan_results
+  debug:
+    var: scan_results
+

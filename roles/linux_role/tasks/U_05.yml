@@ -1,0 +1,32 @@
+- name: Check if /etc/shadow exists
+  stat:
+    path: /etc/shadow
+  register: shadow_stat
+
+- name: Check if /etc/passwd exists
+  stat:
+    path: /etc/passwd
+  register: passwd_stat
+
+- name: Check the second field of /etc/passwd for all users
+  shell: "awk -F: '{print \\$2}' /etc/passwd | grep -v '^x$' || echo 'x'"
+  register: passwd_field_check
+  when: passwd_stat.stat.exists
+
+- name: Evaluate if passwords are stored in /etc/shadow
+  set_fact:
+    passwd_in_shadow_check: >-
+      {{
+        shadow_stat.stat.exists and
+        passwd_field_check.stdout == "x"
+      }}
+
+- name: Set scan_results based on password storage check
+  set_fact:
+    scan_results: "{{ scan_results | combine({
+                      'U_05': passwd_in_shadow_check | bool
+                    }) }}"
+
+- name: Display scan_results # 작성 완료 후 삭제 가능
+  debug:
+    var: scan_results
