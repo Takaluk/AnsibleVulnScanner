@@ -9,3 +9,15 @@
     scan_results: {}
 - name: linux_u01
   include_tasks: linux_u01.yml
+
+- name: Write scan_results to a file on the control node
+  local_action:
+    module: copy
+    content: |
+      {
+        "hostname": "{{ inventory_hostname }}",
+        "scan_results": {{ scan_results | to_nice_json }}
+      }
+    dest: "/AnsibleVulnScanner/scan_results/{{ inventory_hostname }}_scan_results.json"
+  delegate_to: localhost
+

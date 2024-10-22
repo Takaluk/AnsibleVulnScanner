@@ -1,0 +1,27 @@
+---
+- hosts: all
+  gather_facts: yes
+  tasks:
+    - name: Add Linux hosts to linux group
+      add_host:
+        name: "{{ inventory_hostname }}"
+        groups: "linux"
+      when: ansible_system == "Linux"
+
+    - name: Add Windows hosts to windows group
+      add_host:
+        name: "{{ inventory_hostname }}"
+        groups: "windows"
+      when: ansible_system == "Windows"
+
+- hosts: linux
+  tasks:
+    - name: Apply Linux role for RedHat and Debian
+      include_role:
+        name: linux_role
+- hosts: windows
+  tasks:
+    - name: Apply Windows role
+      include_role:
+        name: windows_role
+      when: ansible_facts['os_family'] == "Windows"
