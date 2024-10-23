@@ -1,5 +1,0 @@
----
-- hosts: windows_servers
-  roles:
-    - windows_role
-

@@ -1,0 +1,41 @@
+- name: Check if tftp service is active
+  ansible.builtin.shell: systemctl is-active tftp || true
+  register: tftp_status
+  ignore_errors: yes
+
+- name: Check if talk service is active
+  ansible.builtin.shell: systemctl is-active talk || true
+  register: talk_status
+  ignore_errors: yes
+
+- name: Evaluate tftp and talk services status
+  set_fact:
+    services_active: "{{ tftp_status.stdout == 'active' or talk_status.stdout == 'active' }}"
+
+- name: Stop tftp service if active
+  ansible.builtin.systemd:
+    name: tftp
+    state: stopped
+  when: tftp_status.stdout == 'active'
+
+- name: Stop talk service if active
+  ansible.builtin.systemd:
+    name: talk
+    state: stopped
+  when: talk_status.stdout == 'active'
+
+- name: Disable tftp service to prevent startup
+  ansible.builtin.systemd:
+    name: tftp
+    enabled: false
+  when: tftp_status.stdout == 'active'
+
+- name: Disable talk service to prevent startup
+  ansible.builtin.systemd:
+    name: talk
+    enabled: false
+  when: talk_status.stdout == 'active'
+
+- name: Set scan_results based on tftp and talk service status
+  set_fact:
+    scan_results: "{{ scan_results | combine({'U_29': not services_active}) }}"

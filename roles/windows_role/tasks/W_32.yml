@@ -1,0 +1,15 @@
+---
+- name: Check allocatedasd registry value
+  win_shell: |
+    try {
+      $value = (Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name 'allocatedasd' -ErrorAction Stop).allocatedasd
+    } catch {
+      $value = "NotFound"
+    }
+    Write-Output $value
+  register: allocatedasd_value
+
+- name: Determine if allocatedasd is 0
+  set_fact:
+    scan_results: "{{ scan_results | combine({'W_32': (allocatedasd_value.stdout.strip() == '0')}) }}"
+

@@ -1,0 +1,20 @@
+- name: Check ownership and permissions of /etc/services
+  stat:
+    path: /etc/services
+  register: services_stat
+
+- name: Check if ownership is root and permissions are 644 or less for /etc/services
+  set_fact:
+    services_owner_permission_check: >-
+      {{
+        services_stat.stat.pw_name == 'root' and
+        services_stat.stat.mode | int(base=8) <= 644
+      }}
+
+- name: Set scan_results based on /etc/services ownership and permission check
+  set_fact:
+    scan_results: "{{ scan_results | combine({
+                      'U_13': services_owner_permission_check | bool
+                    }) }}"
+
+

@@ -1,0 +1,17 @@
+---
+- name: Check restrictanonymous registry value
+  win_shell: |
+    $value = (Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa' -Name 'restrictanonymous').restrictanonymous
+    Write-Output $value
+  register: restrict_anonymous
+
+- name: Check restrictanonymoussam registry value
+  win_shell: |
+    $value = (Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa' -Name 'restrictanonymoussam').restrictanonymoussam
+    Write-Output $value
+  register: restrict_anonymous_sam
+
+- name: Determine if both registry values are 1
+  set_fact:
+    scan_results: "{{ scan_results | combine({'W_30': (restrict_anonymous.stdout.strip() == '1' and restrict_anonymous_sam.stdout.strip() == '1')}) }}"
+

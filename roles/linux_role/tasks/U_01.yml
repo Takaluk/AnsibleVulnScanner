@@ -1,0 +1,26 @@
+- name: Check if /etc/securetty does not exist
+  stat:
+    path: /etc/securetty
+  register: securetty_stat
+
+- name: Check contents of /etc/securetty
+  shell: grep -E '^pts/' /etc/securetty || true
+  register: securetty_grep
+  when: securetty_stat.stat.exists
+
+- name: Check if PermitRootLogin no is not commented
+  shell: grep -E '^PermitRootLogin no' /etc/ssh/sshd_config || true
+  register: sshd_config_grep
+
+- name: Evaluate all conditions
+  set_fact:
+    all_conditions: >-
+      {{
+        ((not securetty_stat.stat.exists) or
+        (securetty_stat.stat.exists and (securetty_grep.stdout == '' or securetty_grep.stdout.startswith('#')))) and
+        (sshd_config_grep.stdout != '')
+      }}
+
+- name: Set scan_results based on all conditions
+  set_fact:
+    scan_results: "{{ scan_results | combine({'U_01': all_conditions | bool}) }}"

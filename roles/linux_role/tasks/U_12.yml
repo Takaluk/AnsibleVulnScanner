@@ -1,0 +1,36 @@
+- name: Check if /etc/rsyslog.conf exists
+  stat:
+    path: /etc/rsyslog.conf
+  register: rsyslog_stat
+
+- name: Check if /etc/syslog.conf exists
+  stat:
+    path: /etc/syslog.conf
+  register: syslog_stat
+
+- name: Determine which file to check (/etc/rsyslog.conf or /etc/syslog.conf)
+  set_fact:
+    syslog_file: "{{ '/etc/rsyslog.conf' if rsyslog_stat.stat.exists else '/etc/syslog.conf' }}"
+  when: rsyslog_stat.stat.exists or syslog_stat.stat.exists
+
+- name: Check ownership and permissions of the selected syslog file
+  stat:
+    path: "{{ syslog_file }}"
+  register: selected_syslog_stat
+  when: rsyslog_stat.stat.exists or syslog_stat.stat.exists
+
+- name: Check if ownership is root and permissions are 644 or less for rsyslog or syslog file
+  set_fact:
+    syslog_owner_permission_check: >-
+      {{
+        selected_syslog_stat.stat.pw_name == 'root' and
+        selected_syslog_stat.stat.mode | int(base=8) <= 644
+      }}
+  when: rsyslog_stat.stat.exists or syslog_stat.stat.exists
+
+- name: Set scan_results based on syslog/rsyslog file ownership and permission check
+  set_fact:
+    scan_results: "{{ scan_results | combine({
+                      'U_12': (syslog_owner_permission_check | bool) if (rsyslog_stat.stat.exists or syslog_stat.stat.exists) else false
+                    }) }}"
+

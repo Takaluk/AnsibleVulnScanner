@@ -1,0 +1,57 @@
+- name: Check if echo service is active
+  ansible.builtin.shell: systemctl is-active echo.socket || true
+  register: echo_status
+  ignore_errors: yes
+
+- name: Disable echo service if active
+  ansible.builtin.systemd:
+    name: echo.socket
+    state: stopped
+  when: echo_status.stdout == 'active'
+
+- name: Check if discard service is active
+  ansible.builtin.shell: systemctl is-active discard.socket || true
+  register: discard_status
+  ignore_errors: yes
+
+- name: Disable discard service if active
+  ansible.builtin.systemd:
+    name: discard.socket
+    state: stopped
+  when: discard_status.stdout == 'active'
+
+- name: Check if daytime service is active
+  ansible.builtin.shell: systemctl is-active daytime.socket || true
+  register: daytime_status
+  ignore_errors: yes
+
+- name: Disable daytime service if active
+  ansible.builtin.systemd:
+    name: daytime.socket
+    state: stopped
+  when: daytime_status.stdout == 'active'
+
+- name: Check if chargen service is active
+  ansible.builtin.shell: systemctl is-active chargen.socket || true
+  register: chargen_status
+  ignore_errors: yes
+
+- name: Disable chargen service if active
+  ansible.builtin.systemd:
+    name: chargen.socket
+    state: stopped
+  when: chargen_status.stdout == 'active'
+
+- name: Evaluate all conditions for DoS services
+  set_fact:
+    all_conditions: >-
+      {{
+        ('inactive' in echo_status.stdout or 'not-found' in echo_status.stderr) and
+        ('inactive' in discard_status.stdout or 'not-found' in discard_status.stderr) and
+        ('inactive' in daytime_status.stdout or 'not-found' in daytime_status.stderr) and
+        ('inactive' in chargen_status.stdout or 'not-found' in chargen_status.stderr)
+      }}
+
+- name: Set scan_results based on DoS services status
+  set_fact:
+    scan_results: "{{ scan_results | combine({'U_23': all_conditions | bool}) }}"

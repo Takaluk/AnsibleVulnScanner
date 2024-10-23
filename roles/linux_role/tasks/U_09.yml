@@ -1,0 +1,20 @@
+- name: Check ownership and permissions of /etc/shadow
+  stat:
+    path: /etc/shadow
+  register: shadow_stat
+
+- name: Check if /etc/shadow ownership is root and permissions are 400 or less
+  set_fact:
+    shadow_owner_permission_check: >-
+      {{
+        shadow_stat.stat.pw_name == 'root' and
+        shadow_stat.stat.mode | int(base=8) <= 400
+      }}
+
+- name: Set scan_results based on /etc/shadow ownership and permission check
+  set_fact:
+    scan_results: "{{ scan_results | combine({
+                      'U_09': shadow_owner_permission_check | bool
+                    }) }}"
+
+

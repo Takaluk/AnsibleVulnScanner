@@ -1,0 +1,27 @@
+- name: Disable R Service
+  ansible.builtin.shell: systemctl is-enabled rsh.socket || true
+  register: rsh_status
+  ignore_errors: yes
+
+- name: Check if rlogin service is disabled
+  ansible.builtin.shell: systemctl is-enabled rlogin.socket || true
+  register: rlogin_status
+  ignore_errors: yes
+
+- name: Check if rexec service is disabled
+  ansible.builtin.shell: systemctl is-enabled rexec.socket || true
+  register: rexec_status
+  ignore_errors: yes
+
+- name: Evaluate all R service conditions
+  set_fact:
+    all_r_services_disabled: >-
+      {{
+        (rsh_status.stdout == 'disabled' or 'not-found' in rsh_status.stderr) and
+        (rlogin_status.stdout == 'disabled' or 'not-found' in rlogin_status.stderr) and
+        (rexec_status.stdout == 'disabled' or 'not-found' in rexec_status.stderr)
+      }}
+
+- name: Set scan_results based on all R service conditions
+  set_fact:
+    scan_results: "{{ scan_results | combine({'U_22': all_r_services_disabled | bool}) }}"

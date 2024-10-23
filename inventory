@@ -1,0 +1,2 @@
+localhost ansible_user=devops ansible_become=true
+10.0.2.15 ansible_user=administrator ansible_password=1q2w3e4r!!@ ansible_connection=winrm ansible_winrm_transport=basic ansible_winrm_server_cert_validation=ignore

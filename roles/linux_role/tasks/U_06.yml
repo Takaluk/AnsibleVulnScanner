@@ -1,0 +1,19 @@
+- name: Get current PATH environment variable
+  shell: echo $PATH
+  register: path_env
+
+- name: Check if PATH contains "." at the beginning or middle
+  set_fact:
+    path_contains_dot: >-
+      {{
+        path_env.stdout.split(':')[0] == '.' or
+        ('.' in path_env.stdout.split(':') and path_env.stdout.split(':')[-1] != '.')
+      }}
+
+- name: Set scan_results based on PATH check
+  set_fact:
+    scan_results: "{{ scan_results | combine({
+                      'U_06': not path_contains_dot | bool
+                    }) }}"
+
+
