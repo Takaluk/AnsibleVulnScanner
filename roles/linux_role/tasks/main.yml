@@ -4,95 +4,184 @@
 
 - name: U_01
   include_tasks: U_01.yml
+  tags:
+    - U_01
 
 - name: U_02
   include_tasks: U_02.yml
+  tags:
+    - U_02
 
 - name: U_03
   include_tasks: U_03.yml
+  tags:
+    - U_03
 
 - name: U_04
   include_tasks: U_04.yml
+  tags:
+    - U_04
 
 - name: U_05
   include_tasks: U_05.yml
+  tags:
+    - U_05
 
 - name: U_06
   include_tasks: U_06.yml
+  tags:
+    - U_06
 
 - name: U_07
   include_tasks: U_07.yml
+  tags:
+    - U_07
 
 - name: U_08
   include_tasks: U_08.yml
+  tags:
+    - U_08
 
 - name: U_09
   include_tasks: U_09.yml
+  tags:
+    - U_09
 
 - name: U_10
   include_tasks: U_10.yml
+  tags:
+    - U_10
 
 - name: U_11
   include_tasks: U_11.yml
+  tags:
+    - U_11
 
 - name: U_12
   include_tasks: U_12.yml
+  tags:
+    - U_12
 
 - name: U_13
   include_tasks: U_13.yml
+  tags:
+    - U_13
 
 - name: U_14
   include_tasks: U_14.yml
+  tags:
+    - U_14
 
 - name: U_15
   include_tasks: U_15.yml
+  tags:
+    - U_15
 
 - name: U_16
   include_tasks: U_16.yml
+  tags:
+    - U_16
 
 - name: U_17
   include_tasks: U_17.yml
+  tags:
+    - U_17
 
 - name: U_18
   include_tasks: U_18.yml
+  tags:
+    - U_18
 
 - name: U_19
   include_tasks: U_19.yml
-  
+  tags:
+    - U_19
+
 - name: U_20
   include_tasks: U_20.yml
+  tags:
+    - U_20
+
 - name: U_21
   include_tasks: U_21.yml
+  tags:
+    - U_21
+
 - name: U_22
   include_tasks: U_22.yml
+  tags:
+    - U_22
+
 - name: U_23
   include_tasks: U_23.yml
+  tags:
+    - U_23
+
 - name: U_24
   include_tasks: U_24.yml
+  tags:
+    - U_24
+
 - name: U_25
   include_tasks: U_25.yml
+  tags:
+    - U_25
+
 - name: U_26
   include_tasks: U_26.yml
+  tags:
+    - U_26
+
 - name: U_27
   include_tasks: U_27.yml
+  tags:
+    - U_27
+
 - name: U_28
   include_tasks: U_28.yml
+  tags:
+    - U_28
+
 - name: U_29
   include_tasks: U_29.yml
+  tags:
+    - U_29
+
 - name: U_30
   include_tasks: U_30.yml
+  tags:
+    - U_30
+
 - name: U_31
   include_tasks: U_31.yml
+  tags:
+    - U_31
+
 - name: U_32
   include_tasks: U_32.yml
+  tags:
+    - U_32
+
 - name: U_33
   include_tasks: U_33.yml
+  tags:
+    - U_33
+
 - name: U_34
   include_tasks: U_34.yml
+  tags:
+    - U_34
+
 - name: U_35
   include_tasks: U_35.yml
+  tags:
+    - U_35
+
 - name: U_36
   include_tasks: U_36.yml
+  tags:
+    - U_36
+
 - name: Write scan_results to a file on the control node
   local_action:
     module: copy
@@ -103,3 +192,4 @@
       }
     dest: "/AnsibleVulnScanner/scan_results/{{ inventory_hostname }}_scan_results.json"
   delegate_to: localhost
+

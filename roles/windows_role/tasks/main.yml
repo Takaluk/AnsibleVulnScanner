@@ -7,46 +7,102 @@
   set_fact:
     scan_results: {}
 
+- name: W_01
+  include_tasks: W_01.yml
+
+- name: W_02
+  include_tasks: W_02.yml
+
+- name: W_03
+  include_tasks: W_03.yml
+
+- name: W_04
+  include_tasks: W_04.yml
+
+- name: W_05
+  include_tasks: W_05.yml
+
+- name: W_06
+  include_tasks: W_06.yml
+
+- name: W_07
+  include_tasks: W_07.yml
+
+- name: W_08
+  include_tasks: W_08.yml
+
+- name: W_09
+  include_tasks: W_09.yml
+
+- name: W_10
+  include_tasks: W_10.yml
+
+- name: W_11
+  include_tasks: W_11.yml
+
+- name: W_12
+  include_tasks: W_12.yml
+
+- name: W_13
+  include_tasks: W_13.yml
+
+- name: W_14
+  include_tasks: W_14.yml
+
+- name: W_15
+  include_tasks: W_15.yml
+
+- name: W_16
+  include_tasks: W_16.yml
+
+- name: W_17
+  include_tasks: W_17.yml
+
+- name: W_18
+  include_tasks: W_18.yml
+
 - name: W_19
   include_tasks: W_19.yml
-    #- name: W_20
-    #  include_tasks: W_20.yml
-    #
-    #- name: W_21
-    #  include_tasks: W_21.yml
-    #
-    #- name: W_22
-    #  include_tasks: W_22.yml
-    #
-    #- name: W_23
-    #  include_tasks: W_23.yml
-    #
-    #- name: W_24
-    #  include_tasks: W_24.yml
-    #
-    #- name: W_25
-    #  include_tasks: W_25.yml
-    #
-    #- name: W_26
-    #  include_tasks: W_26.yml
-    #
-    #- name: W_27
-    #  include_tasks: W_27.yml
-    #
-    #- name: W_28
-    #  include_tasks: W_28.yml
-    #
-    #- name: W_29
-    #  include_tasks: W_29.yml
-    #
-    #- name: W_30
-    #  include_tasks: W_30.yml
-    #
-    #- name: W_31
-    #  include_tasks: W_31.yml
-    #
-    #- name: W_32
-    #  include_tasks: W_32.yml
+
+- name: W_20
+  include_tasks: W_20.yml
+
+- name: W_21
+  include_tasks: W_21.yml
+
+- name: W_22
+  include_tasks: W_22.yml
+
+- name: W_23
+  include_tasks: W_23.yml
+
+- name: W_24
+  include_tasks: W_24.yml
+
+- name: W_25
+  include_tasks: W_25.yml
+
+- name: W_26
+  include_tasks: W_26.yml
+
+- name: W_27
+  include_tasks: W_27.yml
+
+- name: W_28
+  include_tasks: W_28.yml
+
+- name: W_29
+  include_tasks: W_29.yml
+
+- name: W_30
+  include_tasks: W_30.yml
+
+- name: W_31
+  include_tasks: W_31.yml
+
+- name: W_32
+  include_tasks: W_32.yml
+
 - name: Write scan_results to a file on the control node
   local_action:
     module: copy
@@ -57,3 +113,4 @@
       }
     dest: "/AnsibleVulnScanner/scan_results/{{ inventory_hostname }}_scan_results.json"
   delegate_to: localhost
+

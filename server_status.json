@@ -1,0 +1,12 @@
+[
+    {
+        "name": "localhost",
+        "status": "Connected",
+        "os": "OS: Debian"
+    },
+    {
+        "name": "10.0.2.15",
+        "status": "Connected",
+        "os": "OS: Windows"
+    }
+]

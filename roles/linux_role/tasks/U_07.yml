@@ -1,16 +1,42 @@
-- name: Find files and directories with no valid owner or group
-  shell: find / -nogroup -o -nouser
-  register: invalid_owner_group_files
-  ignore_errors: yes
+- name: Check if /etc/pam.d/system-auth exists
+  stat:
+    path: /etc/pam.d/system-auth
+  register: system_auth_stat
 
-- name: Check if any files or directories have no valid owner or group
+- name: Check contents of /etc/pam.d/system-auth for password complexity and enforce_for_root
+  shell: cat /etc/pam.d/system-auth
+  register: system_auth_content
+  when: system_auth_stat.stat.exists
+  failed_when: false
+
+- name: Check if pam_pwquality.conf exists
+  stat:
+    path: /etc/security/pwquality.conf
+  register: pwquality_conf_stat
+
+- name: Check contents of /etc/security/pwquality.conf for minlen
+  shell: grep -E '^minlen\s*=\s*([8-9]|1[0-9])' /etc/security/pwquality.conf || true
+  register: minlen_grep
+  when: pwquality_conf_stat.stat.exists
+  failed_when: false
+
+- name: Check contents of /etc/security/pwquality.conf for credit settings (ucredit, lcredit, dcredit, ocredit)
+  shell: grep -E '^(ucredit|lcredit|dcredit|ocredit)\s*=\s*-1' /etc/security/pwquality.conf || true
+  register: credit_grep
+  when: pwquality_conf_stat.stat.exists
+  failed_when: false
+
+- name: Evaluate password complexity conditions
   set_fact:
-    has_invalid_owner_group: "{{ invalid_owner_group_files.stdout != '' }}"
+    password_complexity_conditions: >-
+      {{
+        (minlen_grep.stdout is defined and minlen_grep.stdout != '') and
+        (credit_grep.stdout is defined and credit_grep.stdout != '')
+      }}
 
-- name: Set scan_results based on invalid owner or group check
+- name: Set scan_results based on conditions in system-auth and pwquality.conf
   set_fact:
     scan_results: "{{ scan_results | combine({
-                      'U_07': not has_invalid_owner_group | bool
+                      'U_07': (system_auth_content.stdout is defined and system_auth_content.stdout != '') and
+                              password_complexity_conditions | bool
                     }) }}"
-
-

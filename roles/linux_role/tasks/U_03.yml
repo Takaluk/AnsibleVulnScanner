@@ -7,6 +7,7 @@
   shell: grep -E 'deny=[0-5]' /etc/pam.d/system-auth || true
   register: system_auth_deny
   when: system_auth_stat.stat.exists
+  failed_when: false
 
 - name: Check if /etc/pam.d/password-auth exists
   stat:
@@ -17,9 +18,11 @@
   shell: grep -E 'deny=[0-5]' /etc/pam.d/password-auth || true
   register: password_auth_deny
   when: password_auth_stat.stat.exists
+  failed_when: false
 
 - name: Set scan_results based on deny settings in system-auth and password-auth
   set_fact:
-    scan_results: "{{ scan_results | combine({'U_03': (system_auth_deny.stdout != '') and (password_auth_deny.stdout != '')}) }}"
-
-
+    scan_results: "{{ scan_results | combine({
+                      'U_03': (system_auth_deny.stdout is defined and system_auth_deny.stdout != '') and
+                              (password_auth_deny.stdout is defined and password_auth_deny.stdout != '')
+                    }) }}"

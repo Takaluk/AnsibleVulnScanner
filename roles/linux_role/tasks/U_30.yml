@@ -14,10 +14,6 @@
   when: sendmail_process.stdout != '' and sendmail_installed.rc == 0
   ignore_errors: yes
 
-- name: Initialize scan_results
-  set_fact:
-    scan_results: {}
-
 - name: Set scan_results for Sendmail
   set_fact:
     scan_results: >-
