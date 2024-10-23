@@ -1,22 +1,18 @@
 ---
-- name: Check and set NetBIOS Options
-  hosts: windows
-  tasks:
-    - name: Check current NetBIOS Options
-      win_reg_stat:
-        path: HKLM\SYSTEM\CurrentControlSet\services\NetBT\Parameters\Interfaces
-        name: NetbiosOptions
-      register: netbios_option
+- name: NetBIOS 바인딩 상태 확인
+  win_shell: |
+    $networkAdapters = Get-WmiObject -Query "SELECT * FROM Win32_NetworkAdapterConfiguration WHERE IPEnabled = 'TRUE'"
+    $bindingRemoved = $true
+    foreach ($adapter in $networkAdapters) {
+      if ($adapter.TcpipNetbiosOptions -ne 2) {
+        $bindingRemoved = $false
+      }
+    }
+    if ($bindingRemoved -eq $true) { Write-Output 'true' }
+    else { Write-Output 'false' }
+  register: netbios_binding_check
 
-    - name: Set NetBIOS Options to 2 if not set
-      win_regedit:
-        path: HKLM\SYSTEM\CurrentControlSet\services\NetBT\Parameters\Interfaces
-        name: NetbiosOptions
-        data: 2
-        type: dword
-      when: netbios_option.value != 2
-
-    - name: Display current NetBIOS Options
-      debug:
-        msg: "Current NetBIOS Options value is {{ netbios_option.value }}"
+- name: NetBIOS 바인딩 상태를 scan_result에 설정
+  set_fact:
+    scan_results: "{{ scan_results | combine({ 'W_12': (netbios_binding_check.stdout == 'true') }) }}"
 

@@ -6,9 +6,6 @@
 - name: Set var for windows_role
   set_fact:
     scan_results: {}
-
-- name: W_19
-  include_tasks: W_19.yml
     #- name: W_20
     #  include_tasks: W_20.yml
     #

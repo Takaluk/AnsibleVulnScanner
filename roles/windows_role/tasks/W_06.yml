@@ -1,21 +1,12 @@
 ---
-- name: Check Windows password age policy
-  hosts: windows
-  gather_facts: no
-  tasks:
-    - name: Get all user accounts
-      win_shell: |
-        Get-LocalUser | Select-Object Name, PasswordNeverExpires | ConvertTo-Json
-      register: user_accounts
+- name: 암호 사용기간 제한없음 설정 여부 확인
+  win_shell: |
+    $noExpirationAccounts = Get-LocalUser | Where-Object { $_.PasswordExpires -eq $false }
+    if ($noExpirationAccounts) { Write-Output 'false' }
+    else { Write-Output 'true' }
+  register: no_expiration_check
 
-    - name: Parse user accounts
-      set_fact:
-        user_password_policy: "{{ user_accounts.stdout | from_json }}"
-
-    - name: Display results
-      debug:
-        msg: >
-          {% for user in user_password_policy %}
-          User: {{ user.Name }} - Password Never Expires: {{ user.PasswordNeverExpires | bool }}
-          {% endfor %}
+- name: 설정 확인 및 scan_result 업데이트
+  set_fact:
+    scan_results: "{{ scan_results | combine({ 'W_06': (no_expiration_check.stdout == 'true') }) }}"
 

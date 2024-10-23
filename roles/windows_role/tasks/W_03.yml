@@ -1,24 +1,22 @@
 ---
-- name: Check for Unnecessary Accounts
-  hosts: windows
-  gather_facts: no
-  tasks:
-    - name: Check for unnecessary accounts
-      win_shell: |
-        $defaultAccounts = @( 'Administrator', 'Guest', 'DefaultAccount', 'WDAGUtilityAccount')  # 기본 계정 목록
-        $existingAccounts = Get-LocalUser | Where-Object { $_.Name -notin $defaultAccounts }
-        if ($existingAccounts) {
-            Write-Host "vulnerable"
-        } else {
-            Write-Host "healthy"
-        }
-      register: account_check
+- name: Get all user accounts
+  win_shell: Get-LocalUser
+  register: all_users
 
-    - name: Output account check result
-      debug:
-        msg: >
-          {% if account_check.stdout == 'healthy' %}
-          The system is healthy: No unnecessary accounts found.
-          {% else %}
-          The system is vulnerable: Unnecessary accounts found.
-          {% endif %}
+- name: Get current logged-in user
+  win_shell: $env:USERNAME
+  register: current_user
+
+- name: Extract usernames from user account list
+  set_fact:
+    all_usernames: "{{ all_users.stdout_lines | map('regex_replace', '^.*Name\\s*:\\s*(\\w+).*$','\\1') | list }}"
+
+- name: Determine unnecessary accounts
+  set_fact:
+    unnecessary_accounts: >
+      {{ all_usernames | reject('search', 'Administrator|Guest|DefaultAccount|WDAGUtilityAccount|' + current_user.stdout) | list | length > 0 }}
+
+- name: Set scan_result based on unnecessary accounts
+  set_fact:
+    scan_results: "{{ scan_results | combine({ 'unnecessary_accounts_exist': unnecessary_accounts }) }}"
+
