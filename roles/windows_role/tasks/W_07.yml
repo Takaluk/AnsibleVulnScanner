@@ -1,36 +1,14 @@
 ---
-- name: Check Security Settings on Windows
-  hosts: windows
-  gather_facts: no
-  tasks:
-    - name: Export Security Settings to INF file
-      win_command: secedit /export /cfg C:\Windows\Temp\secconfig.inf
-      register: secedit_export
+- name: ClearTextPassword 설정값 확인
+  win_shell: |
+    $registryPath = 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Netlogon\\Parameters'
+    $registryValue = 'ClearTextPassword'
+    $value = (Get-ItemProperty -Path $registryPath -Name $registryValue -ErrorAction SilentlyContinue).$registryValue
+    if ($value -eq 0) { Write-Output 'true' }
+    else { Write-Output 'false' }
+  register: clear_text_password_check
 
-    - name: Read INF file to get ClearTextPassword
-      win_shell: |
-        $content = Get-Content C:\Windows\Temp\secconfig.inf
-        $clear_text_password = ($content -match '^ClearTextPassword\s*=\s*(\d+)')[0] -replace '^ClearTextPassword\s*=\s*', ''
-        Write-Output $clear_text_password
-      register: clear_text_password
-      failed_when: clear_text_password.rc != 0 or clear_text_password.stdout == ''
-
-    - name: Initialize scan_results
-      set_fact:
-        scan_results: {}
-
-    - name: Determine if ClearTextPassword is 0 or 1
-      set_fact:
-        scan_results: "{{ scan_results | combine({'ClearTextPassword': (clear_text_password.stdout | int) == 0}) }}"
-
-    - name: Display results
-      debug:
-        msg: >
-          ClearTextPassword is {{ clear_text_password.stdout }} - 
-          Status: {{ '양호' if clear_text_password.stdout | int == 0 else '취약' }}
-
-    - name: Clean up INF file
-      win_file:
-        path: C:\Windows\Temp\secconfig.inf
-        state: absent
+- name: 설정 확인 및 scan_result 업데이트
+  set_fact:
+    scan_results: "{{ scan_results | combine({ 'W_07': (clear_text_password_check.stdout == 'true') }) }}"
 

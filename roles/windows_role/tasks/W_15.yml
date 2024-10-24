@@ -1,0 +1,4 @@
+---
+- name: Anonymous FTP 금지
+  set_fact:
+    scan_results: "{{ scan_results | combine({'W_15': none}) }}"
