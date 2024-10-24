@@ -1,16 +1,15 @@
 - name: Find files and directories with no valid owner or group
-  shell: find / -nogroup -o -nouser
+  shell: "find / -nogroup -o -nouser 2>/dev/null"
   register: invalid_owner_group_files
+  failed_when: false
   ignore_errors: yes
 
 - name: Check if any files or directories have no valid owner or group
   set_fact:
-    has_invalid_owner_group: "{{ invalid_owner_group_files.stdout != '' }}"
+    has_invalid_owner_group: "{{ invalid_owner_group_files.stdout is defined and invalid_owner_group_files.stdout != '' }}"
 
 - name: Set scan_results based on invalid owner or group check
   set_fact:
     scan_results: "{{ scan_results | combine({
                       'U_07': not has_invalid_owner_group | bool
                     }) }}"
-
-

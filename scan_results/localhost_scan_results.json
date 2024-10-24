@@ -1,1 +1,1 @@
-{"hostname": "localhost", "scan_results": {"u01": false}}
+{"hostname": "localhost", "scan_results": {"U_01": false, "U_02": false, "U_03": false, "U_07": true, "U_08": true}}

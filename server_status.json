@@ -1,0 +1,22 @@
+[
+    {
+        "name": "localhost",
+        "ip": "localhost",
+        "status": "Connected",
+        "os": "Debian",
+        "version": "24.04",
+        "security_level": "Medium",
+        "department": "\uacbd\uc601\uc9c0\uc6d0\uc2e4",
+        "manager": "\uae40\uc724\uc8fc"
+    },
+    {
+        "name": "10.0.2.15",
+        "ip": "10.0.2.15",
+        "status": "Connected",
+        "os": "Windows",
+        "version": "Microsoft Windows Server 2019 Standard 10.0.17763.0",
+        "security_level": "Low",
+        "department": "\ub0b4\ube44\ud488\uc9c8\uc2e4",
+        "manager": "\uc548\uc8fc\ud604"
+    }
+]

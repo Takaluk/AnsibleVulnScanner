@@ -1,0 +1,14 @@
+[
+    {
+        "hostname": "localhost",
+        "security_level": "Medium",
+        "department": "경영지원실",
+        "manager": "김윤주"
+    },
+    {
+        "hostname": "10.0.2.15",
+        "security_level": "Low",
+        "department": "내비품질실",
+        "manager": "안주현"
+    }
+]
