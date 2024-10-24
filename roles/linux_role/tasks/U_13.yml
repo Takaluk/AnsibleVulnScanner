@@ -1,20 +1,22 @@
-- name: Check ownership and permissions of /etc/services
+- name: /etc/services 파일의 소유권과 권한 확인
   stat:
     path: /etc/services
   register: services_stat
+  ignore_errors: yes
 
-- name: Check if ownership is root and permissions are 644 or less for /etc/services
+- name: /etc/services 파일의 소유자가 root이고 권한이 644 이하인지 확인
   set_fact:
     services_owner_permission_check: >-
       {{
         services_stat.stat.pw_name == 'root' and
         services_stat.stat.mode | int(base=8) <= 644
       }}
+  ignore_errors: yes
 
-- name: Set scan_results based on /etc/services ownership and permission check
+- name: /etc/services 파일의 소유권 및 권한 검사 결과를 기반으로 scan_results 설정
   set_fact:
     scan_results: "{{ scan_results | combine({
                       'U_13': services_owner_permission_check | bool
                     }) }}"
-
+  ignore_errors: yes
 

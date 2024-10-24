@@ -1,30 +1,34 @@
-- name: Check if /etc/shadow exists
+- name: /etc/shadow 파일이 존재하는지 확인
   stat:
     path: /etc/shadow
   register: shadow_stat
+  ignore_errors: yes
 
-- name: Check if /etc/passwd exists
+- name: /etc/passwd 파일이 존재하는지 확인
   stat:
     path: /etc/passwd
   register: passwd_stat
+  ignore_errors: yes
 
-- name: Check the second field of /etc/passwd for all users
+- name: /etc/passwd의 두 번째 필드를 모든 사용자에 대해 확인
   shell: "awk -F: '{print \\$2}' /etc/passwd | grep -v '^x$' || echo 'x'"
   register: passwd_field_check
   when: passwd_stat.stat.exists
+  ignore_errors: yes
 
-- name: Evaluate if passwords are stored in /etc/shadow
+- name: 비밀번호가 /etc/shadow에 저장되었는지 평가
   set_fact:
     passwd_in_shadow_check: >-
       {{
         shadow_stat.stat.exists and
         passwd_field_check.stdout == "x"
       }}
+  ignore_errors: yes
 
-- name: Set scan_results based on password storage check
+- name: 비밀번호 저장 검사 결과를 기반으로 scan_results 설정
   set_fact:
     scan_results: "{{ scan_results | combine({
                       'U_05': passwd_in_shadow_check | bool
                     }) }}"
-
+  ignore_errors: yes
 

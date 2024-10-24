@@ -1,19 +1,21 @@
-- name: Get current PATH environment variable
+- name: 현재 PATH 환경 변수를 가져오기
   shell: echo $PATH
   register: path_env
+  ignore_errors: yes
 
-- name: Check if PATH contains "." at the beginning or middle
+- name: PATH에 "."이 처음 또는 중간에 포함되어 있는지 확인
   set_fact:
     path_contains_dot: >-
       {{
         path_env.stdout.split(':')[0] == '.' or
         ('.' in path_env.stdout.split(':') and path_env.stdout.split(':')[-1] != '.')
       }}
+  ignore_errors: yes
 
-- name: Set scan_results based on PATH check
+- name: PATH 검사 결과를 기반으로 scan_results 설정
   set_fact:
     scan_results: "{{ scan_results | combine({
                       'U_06': not path_contains_dot | bool
                     }) }}"
-
+  ignore_errors: yes
 

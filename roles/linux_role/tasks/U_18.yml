@@ -1,41 +1,47 @@
-- name: Check if /etc/hosts.allow exists
+- name: /etc/hosts.allow 파일이 존재하는지 확인
   stat:
     path: /etc/hosts.allow
   register: hosts_allow_stat
+  ignore_errors: yes
 
-- name: Check if /etc/hosts.deny exists
+- name: /etc/hosts.deny 파일이 존재하는지 확인
   stat:
     path: /etc/hosts.deny
   register: hosts_deny_stat
+  ignore_errors: yes
 
-- name: Check contents of /etc/hosts.allow
+- name: /etc/hosts.allow 파일의 내용을 확인
   shell: cat /etc/hosts.allow
   register: hosts_allow_content
   when: hosts_allow_stat.stat.exists
   failed_when: false
+  ignore_errors: yes
 
-- name: Check contents of /etc/hosts.deny
+- name: /etc/hosts.deny 파일의 내용을 확인
   shell: cat /etc/hosts.deny
   register: hosts_deny_content
   when: hosts_deny_stat.stat.exists
   failed_when: false
+  ignore_errors: yes
 
-- name: Check iptables settings
+- name: iptables 설정 확인
   shell: iptables -nL
   register: iptables_settings
   failed_when: false
+  ignore_errors: yes
 
-- name: Check firewall-cmd settings if firewall-cmd is available
+- name: firewall-cmd가 사용 가능한 경우 firewall-cmd 설정 확인
   shell: firewall-cmd --list-all
   register: firewall_cmd_settings
   ignore_errors: yes
   failed_when: false
 
-- name: Initialize IP and port restriction check status to false (default unsafe)
+- name: IP 및 포트 제한 검사 상태를 기본값으로 false로 초기화 (기본적으로 안전하지 않음)
   set_fact:
     ip_port_restriction_check: false
+  ignore_errors: yes
 
-- name: Set IP and port restriction check status to true if restrictions are configured properly
+- name: IP 및 포트 제한이 올바르게 구성된 경우 상태를 true로 설정
   set_fact:
     ip_port_restriction_check: true
   when: >
@@ -51,10 +57,12 @@
       firewall_cmd_settings.stdout is defined and
       firewall_cmd_settings.stdout.find('ports:') != -1
     )
+  ignore_errors: yes
 
-- name: Set scan_results based on IP and port restriction check
+- name: IP 및 포트 제한 검사 결과를 기반으로 scan_results 설정
   set_fact:
     scan_results: "{{ scan_results | combine({
                       'U_18': ip_port_restriction_check | bool
                     }) }}"
+  ignore_errors: yes
 
