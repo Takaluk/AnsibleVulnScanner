@@ -1,4 +1,5 @@
 ---
-- name: Antivirus softwar Installed
+- name: 안티바이러스 소프트웨어 설치 확인
   set_fact:
     scan_results: "{{ scan_results | combine({'W_24': none}) }}"
+  ignore_errors: yes

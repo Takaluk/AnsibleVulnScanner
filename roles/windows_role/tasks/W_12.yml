@@ -11,8 +11,9 @@
     if ($bindingRemoved -eq $true) { Write-Output 'true' }
     else { Write-Output 'false' }
   register: netbios_binding_check
+  ignore_errors: yes
 
 - name: NetBIOS 바인딩 상태를 scan_result에 설정
   set_fact:
     scan_results: "{{ scan_results | combine({ 'W_12': (netbios_binding_check.stdout == 'true') }) }}"
-
+	ignore_errors: yes

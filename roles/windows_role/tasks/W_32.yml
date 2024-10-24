@@ -1,5 +1,5 @@
 ---
-- name: Check allocatedasd registry value
+- name: allocatedasd 레지스트리 값 확인
   win_shell: |
     try {
       $value = (Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name 'allocatedasd' -ErrorAction Stop).allocatedasd
@@ -8,8 +8,10 @@
     }
     Write-Output $value
   register: allocatedasd_value
+  ignore_errors: yes
 
-- name: Determine if allocatedasd is 0
+- name: allocatedasd 값이 0인지 확인
   set_fact:
     scan_results: "{{ scan_results | combine({'W_32': (allocatedasd_value.stdout.strip() == '0')}) }}"
+  ignore_errors: yes
 

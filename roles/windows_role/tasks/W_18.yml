@@ -2,3 +2,4 @@
 - name: RDS 제거
   set_fact:
     scan_results: "{{ scan_results | combine({'W_18': none}) }}"
+  ignore_errors: yes

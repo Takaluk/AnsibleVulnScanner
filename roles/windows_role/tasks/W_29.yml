@@ -1,11 +1,12 @@
 ---
-- name: Get "Shutdown Security audit cannot be logged" policy value
+- name: 보안 감사 로그 기록 실패 시 시스템 종료 정책 값 가져오기
   win_shell: |
     secedit /export /cfg C:\Windows\Temp\secpol.cfg
     Select-String -Path C:\Windows\Temp\secpol.cfg -Pattern "CrashOnAuditFail"
   register: audit_policy
+  ignore_errors: yes
 
-- name: Determine if the policy is set to "No"
+- name: 정책이 "아니오"로 설정되었는지 확인
   set_fact:
     scan_results: >-
       {{
@@ -15,9 +16,10 @@
           )
         })
       }}
+  ignore_errors: yes
 
-- name: Clean up exported policy file
+- name: 내보낸 정책 파일 정리
   win_file:
     path: C:\Windows\Temp\secpol.cfg
     state: absent
-
+  ignore_errors: yes

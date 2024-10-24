@@ -2,3 +2,4 @@
 - name: FTP 접근 제어 설정
   set_fact:
     scan_results: "{{ scan_results | combine({'W_16': none}) }}"
+  ignore_errors: yes

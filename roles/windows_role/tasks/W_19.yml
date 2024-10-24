@@ -1,11 +1,12 @@
 ---
-- name: Check for latest security patches
+- name: 최신 보안 패치 확인
   win_updates:
     category_names: ['SecurityUpdates']
     state: searched
   register: update_check
+  ignore_errors: yes
 
-- name: Determine if latest security patches are installed
+- name: 최신 보안 패치가 설치되었는지 확인
   set_fact:
-    scan_results: "{{ scan_results | combine({'W_19': (update_check.updates | length == 0)}) }}"
-
+    scan_results: "{{ scan_results | combine({'security_patches': (update_check.updates | length == 0)}) }}"
+  ignore_errors: yes

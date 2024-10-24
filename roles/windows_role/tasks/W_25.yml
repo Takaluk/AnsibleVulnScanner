@@ -1,9 +1,10 @@
 ---
-- name: Get SAM file ACL
+- name: SAM 파일 ACL 가져오기
   win_shell: icacls C:\Windows\System32\config\SAM
   register: sam_acl
+  ignore_errors: yes
 
-- name: Check if only Administrator and System have full control
+- name: 관리자와 시스템만 전체 제어 권한이 있는지 확인
   set_fact:
     scan_results: >-
       {{
@@ -15,4 +16,4 @@
           ) | ternary(true, false)
         })
       }}
-
+  ignore_errors: yes
