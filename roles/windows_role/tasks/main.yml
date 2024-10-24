@@ -164,7 +164,6 @@
   include_tasks: W_32.yml
   tags:
     - W_32
-
 - name: Write scan_results to a file on the control node
   local_action:
     module: copy

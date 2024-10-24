@@ -1,40 +1,24 @@
 ---
-- name: Check Windows Administrators group for unnecessary accounts
-  hosts: windows
-  tasks:
-    - name: Get current logged-in user
-      win_shell: |
-        (Get-WmiObject -Class Win32_ComputerSystem).UserName
-      register: current_user
+- name: Administrators 그룹의 사용자 목록 가져오기
+  win_shell: Get-LocalGroupMember -Group "Administrators"
+  register: admin_group_members
 
-    - name: Get Administrators group members
-      win_shell: |
-        Get-LocalGroupMember -Group "Administrators" | Select-Object -ExpandProperty Name
-      register: admin_members
+- name: 필수 관리자 계정 목록
+  set_fact:
+    essential_admins: ['Administrator', 'OtherEssentialAdmin']
 
-    - name: Determine if unnecessary accounts exist
-      set_fact:
-        status: >-
-          {%- if 'Administrators' in admin_members.stdout -%}
-            {%- set extra_accounts = admin_members.stdout -%}
-            {%- set current_user_name = current_user.stdout.split('\\')[-1] -%}
-            {%- set current_user_domain = current_user.stdout.split('\\')[0] -%}
-            {%- set valid_accounts = ['Administrators', current_user_name] -%}
-            {%- for account in extra_accounts -%}
-              {%- if account not in valid_accounts -%}
-                {%- set _ = extra_accounts.append(account) -%}
-              {%- endif -%}
-            {%- endfor -%}
-            {%- if extra_accounts|length > 2 -%}
-              "VULNERABLE"
-            {%- else -%}
-              "SAFE"
-            {%- endif -%}
-          {%- else -%}
-            "SAFE"
-          {%- endif -%}
+- name: 불필요한 관리자 계정 확인
+  set_fact:
+    unnecessary_admins_exist: >
+      {{
+        admin_group_members.stdout_lines
+        | map('regex_replace', '^.*\\\\([^\\\\]+)$', '\\1')
+        | difference(essential_admins)
+        | list
+        | length > 0
+      }}
 
-    - name: Report status
-      debug:
-        msg: "Status of unnecessary accounts: {{ status }}"
+- name: 설정 확인 및 scan_result 업데이트
+  set_fact:
+    scan_results: "{{ scan_results | combine({ 'W_08': unnecessary_admins_exist }) }}"
 

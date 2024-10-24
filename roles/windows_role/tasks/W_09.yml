@@ -1,36 +1,18 @@
 ---
-- name: Check Windows shared folders and permissions
-  hosts: windows
-  tasks:
-    - name: Get all shared folders
-      win_shell: net share
-      register: shares
+- name: net share 명령어 실행
+  win_shell: net share
+  register: net_share_output
 
-    - name: Check for non-standard shares
-      set_fact:
-        non_standard_shares: "{{ shares.stdout_lines | select('search', '^[A-Za-z]:') | list }}"
+- name: 일반 공유 디렉터리 필터링
+  set_fact:
+    general_shares: >
+      {{
+        net_share_output.stdout_lines
+        | select('search', '^(?!C\$|D\$|Admin\$|IPC\$)\w')
+        | list
+      }}
 
-    - name: Check if there are non-standard shares
-      set_fact:
-        share_status: "{{ 'SAFE' if non_standard_shares | length == 0 else 'VULNERABLE' }}"
-
-    - name: Report non-standard shares status
-      debug:
-        msg: "Status of non-standard shares: {{ share_status }}"
-
-    - name: Check for Everyone share if non-standard shares exist
-      when: share_status == 'VULNERABLE'
-      win_shell: |
-        net share | findstr /I "Everyone"
-      register: everyone_share
-
-    - name: Determine status of Everyone share
-      set_fact:
-        everyone_share_status: "{{ 'SAFE' if everyone_share.stdout == '' else 'VULNERABLE' }}"
-      when: share_status == 'VULNERABLE'
-
-    - name: Report Everyone share status
-      debug:
-        msg: "Status of Everyone share: {{ everyone_share_status }}"
-      when: share_status == 'VULNERABLE'
+- name: 일반 공유 디렉터리 존재 여부 확인
+  set_fact:
+    scan_results: "{{ scan_results | combine({ 'W_09': (general_shares | length == 0) }) }}"
 
