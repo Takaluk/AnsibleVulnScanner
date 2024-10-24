@@ -1,2 +1,4 @@
 /inventory
 /ansible.cfg
+/server_status.json
+/scan_results/
