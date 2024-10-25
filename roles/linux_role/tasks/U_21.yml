@@ -1,16 +1,22 @@
-- name: Check anonymous FTP status in vsftpd.conf
+- name: vsftpd.conf 파일 존재 여부 확인
+  stat:
+    path: /etc/vsftpd.conf
+  register: vsftpd_conf_exists
+
+- name: vsftpd.conf에서 anonymous FTP 상태 확인
   shell: grep "anonymous_enable" /etc/vsftpd.conf
   register: ftp_anonymous_status
+  when: vsftpd_conf_exists.stat.exists
   ignore_errors: yes  # 파일이 없거나 grep이 실패할 경우에도 오류 무시
 
-- name: Evaluate anonymous FTP condition
+- name: anonymous FTP 상태 평가
   set_fact:
     anonymous_ftp_disabled: >-
       {{
-        ('anonymous_enable=NO' in ftp_anonymous_status.stdout) or
-        ('No such file or directory' in ftp_anonymous_status.stderr)
+        (vsftpd_conf_exists.stat.exists == false) or
+        ('anonymous_enable=NO' in ftp_anonymous_status.stdout)
       }}
 
-- name: Set scan_results based on anonymous FTP condition
+- name: anonymous FTP 상태에 따라 scan_results 설정
   set_fact:
     scan_results: "{{ scan_results | combine({'U_21': anonymous_ftp_disabled}) }}"

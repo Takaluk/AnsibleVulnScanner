@@ -1,48 +1,5 @@
-- name: Check if Sendmail process is running
-  ansible.builtin.shell: ps -ef | grep sendmail | grep -v grep
-  register: sendmail_process
-  ignore_errors: yes
-
-- name: Check if Sendmail is installed
-  ansible.builtin.command: which sendmail
-  register: sendmail_installed
-  ignore_errors: yes
-
-- name: Check Sendmail version
-  ansible.builtin.shell: cat /etc/mail/sendmail.cf | grep DZ
-  register: sendmail_version
-  when: sendmail_process.stdout != '' and sendmail_installed.rc == 0
-  ignore_errors: yes
-
-- name: Check if Postfix service is active
-  ansible.builtin.systemd:
-    name: postfix
-    state: started
-  register: postfix_status
-  ignore_errors: yes
-
-- name: Get Postfix PID
-  ansible.builtin.shell: postfix status
-  register: postfix_pid
-  when: postfix_status is not failed
-  ignore_errors: yes
-
-- name: Check Postfix version
-  ansible.builtin.shell: postconf -d | grep mail_version
-  register: postfix_version
-  when: postfix_status is not failed
-  ignore_errors: yes
-
-- name: Set scan_results for Sendmail and Postfix
+---
+- name: Sendmail 버전 점검
   set_fact:
-    scan_results: >-
-      {{
-        scan_results | combine({
-          'U_30': (
-            (sendmail_process.stdout == '' or sendmail_installed.rc != 0 or sendmail_version.stdout is search('vulnerable_version')) and
-            (postfix_status is failed or postfix_version.stdout is search('vulnerable_version'))
-          )
-        })
-      }}
+    scan_results: "{{ scan_results | combine({'U_30': none}) }}"
   ignore_errors: yes
-

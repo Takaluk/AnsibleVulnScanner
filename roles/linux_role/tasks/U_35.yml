@@ -1,26 +1,6 @@
-- name: Check Linux OS version
-  ansible.builtin.shell: cat /etc/os-release
-  register: os_version
+---
+- name: 최신 보안 패치 및 벤더 권고사항 적용 확인
+  set_fact:
+    scan_results: "{{ scan_results | combine({'U_35': none}) }}"
   ignore_errors: yes
 
-- name: Check Kernel version
-  ansible.builtin.shell: uname -r
-  register: kernel_version
-  ignore_errors: yes
-
-- name: Check if the OS version is EOL (End of Life)
-  set_fact:
-    os_eol_status: "{{ 'eol_version' in os_version.stdout }}"  # eol_version은 실제로 EOL 상태인지에 따라 수정해야 함
-
-- name: Check if the Kernel version is up to date
-  set_fact:
-    kernel_outdated: "{{ kernel_version.stdout is search('outdated_kernel_version') }}"  # 실제 Kernel 버전에 따라 수정
-
-- name: Evaluate OS and Kernel patch status
-  set_fact:
-    os_secure: "{{ not os_eol_status }}"
-    kernel_secure: "{{ not kernel_outdated }}"
-
-- name: Set scan_results based on OS and Kernel status
-  set_fact:
-    scan_results: "{{ scan_results | combine({'U_35': os_secure and kernel_secure}) }}"
