@@ -1,11 +1,12 @@
 ---
-- name: Check if Remote Registry Service is stopped
+- name: 원격 레지스트리 서비스가 중지되었는지 확인
   win_service:
     name: RemoteRegistry
     state: stopped
   register: remote_registry_status
-
-- name: Determine if Remote Registry Service is stopped
+  ignore_errors: yes
+  
+- name: 원격 레지스트리 서비스 중지 여부 결정
   set_fact:
     scan_results: "{{ scan_results | combine({'W_23': (remote_registry_status.state == 'stopped')}) }}"
-
+  ignore_errors: yes

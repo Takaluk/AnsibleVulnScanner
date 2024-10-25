@@ -1,5 +1,5 @@
 ---
-- name: Get ShutdownWithoutLogon registry value
+- name: ShutdownWithoutLogon 레지스트리 값 가져오기
   win_shell: |
     try {
       $value = Get-ItemProperty -Path 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'ShutdownWithoutLogon'
@@ -8,8 +8,9 @@
       Write-Output "NotFound"
     }
   register: shutdown_without_logon
+  ignore_errors: yes
 
-- name: Determine if ShutdownWithoutLogon is 0
+- name: ShutdownWithoutLogon 값이 0인지 확인
   set_fact:
     scan_results: >-
       {{
@@ -19,4 +20,4 @@
           )
         })
       }}
-
+  ignore_errors: yes

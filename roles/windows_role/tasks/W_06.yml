@@ -5,8 +5,9 @@
     if ($noExpirationAccounts) { Write-Output 'false' }
     else { Write-Output 'true' }
   register: no_expiration_check
+  ignore_errors: yes
 
 - name: 설정 확인 및 scan_result 업데이트
   set_fact:
     scan_results: "{{ scan_results | combine({ 'W_06': (no_expiration_check.stdout == 'true') }) }}"
-
+  ignore_errors: yes

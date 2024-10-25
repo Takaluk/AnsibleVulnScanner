@@ -1,5 +1,5 @@
 ---
-- name: Check AutoAdminLogon registry value
+- name: AutoAdminLogon 레지스트리 값 확인
   win_shell: |
     try {
       $value = (Get-ItemProperty -Path 'HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name 'AutoAdminLogon' -ErrorAction Stop).AutoAdminLogon
@@ -8,8 +8,10 @@
     }
     Write-Output $value
   register: auto_admin_logon
+  ignore_errors: yes
 
-- name: Determine if AutoAdminLogon is not present or is 0
+- name: AutoAdminLogon이 존재하지 않거나 0인지 확인
   set_fact:
     scan_results: "{{ scan_results | combine({'W_31': (auto_admin_logon.stdout.strip() == '0')}) }}"
+  ignore_errors: yes
 
