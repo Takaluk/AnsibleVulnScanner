@@ -14,23 +14,6 @@
   when: sendmail_process.stdout != '' and sendmail_installed.rc == 0
   ignore_errors: yes
 
-- name: Initialize scan_results
-  set_fact:
-    scan_results: {}
-
-- name: Set scan_results for Sendmail
-  set_fact:
-    scan_results: >-
-      {{
-        scan_results | combine({
-          'U-30_sendmail': (
-            sendmail_process.stdout == '' or 
-            sendmail_installed.rc != 0 or
-            sendmail_version.stdout is search('vulnerable_version')
-          )
-        })
-      }}
-
 - name: Check if Postfix service is active
   ansible.builtin.systemd:
     name: postfix
@@ -50,14 +33,16 @@
   when: postfix_status is not failed
   ignore_errors: yes
 
-- name: Set scan_results for Postfix
+- name: Set scan_results for Sendmail and Postfix
   set_fact:
     scan_results: >-
       {{
         scan_results | combine({
-          'U-30_postfix': (
-            postfix_status is failed or
-            postfix_version.stdout is search('vulnerable_version')
+          'U_30': (
+            (sendmail_process.stdout == '' or sendmail_installed.rc != 0 or sendmail_version.stdout is search('vulnerable_version')) and
+            (postfix_status is failed or postfix_version.stdout is search('vulnerable_version'))
           )
         })
       }}
+  ignore_errors: yes
+
