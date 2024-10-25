@@ -1,25 +1,29 @@
-- name: Check if /etc/rsyslog.conf exists
+- name: /etc/rsyslog.conf 파일이 존재하는지 확인
   stat:
     path: /etc/rsyslog.conf
   register: rsyslog_stat
+  ignore_errors: yes
 
-- name: Check if /etc/syslog.conf exists
+- name: /etc/syslog.conf 파일이 존재하는지 확인
   stat:
     path: /etc/syslog.conf
   register: syslog_stat
+  ignore_errors: yes
 
-- name: Determine which file to check (/etc/rsyslog.conf or /etc/syslog.conf)
+- name: /etc/rsyslog.conf 또는 /etc/syslog.conf 중 어느 파일을 확인할지 결정
   set_fact:
     syslog_file: "{{ '/etc/rsyslog.conf' if rsyslog_stat.stat.exists else '/etc/syslog.conf' }}"
   when: rsyslog_stat.stat.exists or syslog_stat.stat.exists
+  ignore_errors: yes
 
-- name: Check ownership and permissions of the selected syslog file
+- name: 선택한 syslog 파일의 소유권 및 권한 확인
   stat:
     path: "{{ syslog_file }}"
   register: selected_syslog_stat
   when: rsyslog_stat.stat.exists or syslog_stat.stat.exists
+  ignore_errors: yes
 
-- name: Check if ownership is root and permissions are 644 or less for rsyslog or syslog file
+- name: rsyslog 또는 syslog 파일의 소유자가 root이고 권한이 644 이하인지 확인
   set_fact:
     syslog_owner_permission_check: >-
       {{
@@ -27,10 +31,12 @@
         selected_syslog_stat.stat.mode | int(base=8) <= 644
       }}
   when: rsyslog_stat.stat.exists or syslog_stat.stat.exists
+  ignore_errors: yes
 
-- name: Set scan_results based on syslog/rsyslog file ownership and permission check
+- name: syslog/rsyslog 파일의 소유권 및 권한 검사 결과를 기반으로 scan_results 설정
   set_fact:
     scan_results: "{{ scan_results | combine({
                       'U_12': (syslog_owner_permission_check | bool) if (rsyslog_stat.stat.exists or syslog_stat.stat.exists) else false
                     }) }}"
+  ignore_errors: yes
 

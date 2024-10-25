@@ -1,18 +1,22 @@
-- name: Check if /etc/securetty does not exist
+---
+- name: /etc/securetty가 존재하지 않는지 확인
   stat:
     path: /etc/securetty
   register: securetty_stat
+  ignore_errors: yes
 
-- name: Check contents of /etc/securetty
+- name: /etc/securetty의 내용 확인
   shell: grep -E '^pts/' /etc/securetty || true
   register: securetty_grep
   when: securetty_stat.stat.exists
+  ignore_errors: yes
 
-- name: Check if PermitRootLogin no is not commented
+- name: PermitRootLogin no가 주석 처리되지 않았는지 확인
   shell: grep -E '^PermitRootLogin no' /etc/ssh/sshd_config || true
   register: sshd_config_grep
+  ignore_errors: yes
 
-- name: Evaluate all conditions
+- name: 모든 조건 평가
   set_fact:
     all_conditions: >-
       {{
@@ -20,7 +24,10 @@
         (securetty_stat.stat.exists and (securetty_grep.stdout == '' or securetty_grep.stdout.startswith('#')))) and
         (sshd_config_grep.stdout != '')
       }}
+  ignore_errors: yes
 
-- name: Set scan_results based on all conditions
+- name: 모든 조건에 따라 scan_results 설정
   set_fact:
     scan_results: "{{ scan_results | combine({'U_01': all_conditions | bool}) }}"
+  ignore_errors: yes
+
