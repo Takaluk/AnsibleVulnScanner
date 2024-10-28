@@ -1,0 +1,24 @@
+- name: Check if DNS (named) service is running
+  ansible.builtin.shell: ps -ef | grep named | grep -v grep || true
+  register: dns_status
+  ignore_errors: yes
+
+- name: Check BIND version
+  ansible.builtin.shell: named -v || true
+  register: bind_version
+  when: dns_status.stdout != ''
+  ignore_errors: yes
+
+- name: Evaluate if DNS service is running and version is secure
+  set_fact:
+    dns_service_active: "{{ dns_status.stdout != '' }}"
+    dns_secure_version: "{{ bind_version.stdout is defined and bind_version.stdout is search('secure_version') }}"
+
+- name: Stop DNS service if not in use
+  ansible.builtin.shell: kill -9 $(ps -ef | grep named | grep -v grep | awk '{print $2}')
+  when: dns_service_active and not dns_secure_version
+
+- name: Set scan_results based on DNS service status and version
+  set_fact:
+    scan_results: "{{ scan_results | combine({'U_33': not dns_service_active or dns_secure_version}) }}"
+

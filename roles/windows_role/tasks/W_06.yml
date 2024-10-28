@@ -1,0 +1,13 @@
+---
+- name: 암호 사용기간 제한없음 설정 여부 확인
+  win_shell: |
+    $noExpirationAccounts = Get-LocalUser | Where-Object { $_.PasswordExpires -eq $false }
+    if ($noExpirationAccounts) { Write-Output 'false' }
+    else { Write-Output 'true' }
+  register: no_expiration_check
+  ignore_errors: yes
+
+- name: 설정 확인 및 scan_result 업데이트
+  set_fact:
+    scan_results: "{{ scan_results | combine({ 'W_06': (no_expiration_check.stdout == 'true') }) }}"
+  ignore_errors: yes

@@ -1,0 +1,41 @@
+- name: Check if Sendmail process is running
+  ansible.builtin.shell: ps -ef | grep sendmail | grep -v grep || true
+  register: sendmail_status
+  ignore_errors: yes
+
+- name: Check if Sendmail relay restriction is applied
+  ansible.builtin.shell: cat /etc/mail/sendmail.cf | grep "R$ \*" | grep "Relaying denied" || true
+  register: sendmail_relay_restriction
+  when: sendmail_status.stdout != ''
+  ignore_errors: yes
+
+- name: Check if Postfix is installed and active
+  ansible.builtin.shell: systemctl is-active postfix || true
+  register: postfix_status
+  ignore_errors: yes
+
+- name: Check if Postfix relay restriction (mynetworks) is configured
+  ansible.builtin.shell: cat /etc/postfix/main.cf | grep 'mynetworks =' || true
+  register: postfix_mynetworks
+  when: postfix_status.stdout == 'active'
+  ignore_errors: yes
+
+- name: Check if Postfix relay restriction (permit_mynetworks) is applied
+  ansible.builtin.shell: cat /etc/postfix/main.cf | grep 'permit_mynetworks' || true
+  register: postfix_relay_restriction
+  when: postfix_status.stdout == 'active'
+  ignore_errors: yes
+
+- name: Evaluate Sendmail and Postfix relay restrictions
+  set_fact:
+    relay_restriction_applied: >-
+      {{
+        (sendmail_status.stdout == '' or sendmail_relay_restriction.stdout != '') or
+        (postfix_status.stdout == 'active' and
+         postfix_mynetworks.stdout != '' and
+         postfix_relay_restriction.stdout != '')
+      }}
+
+- name: Set scan_results based on relay restriction status
+  set_fact:
+    scan_results: "{{ scan_results | combine({'U_31': relay_restriction_applied}) }}"

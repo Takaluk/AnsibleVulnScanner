@@ -1,0 +1,22 @@
+- name: /etc/passwd의 소유권과 권한 확인
+  stat:
+    path: /etc/passwd
+  register: passwd_stat
+  ignore_errors: yes
+
+- name: /etc/passwd의 소유자가 root이고 권한이 644 이하인지 확인
+  set_fact:
+    passwd_owner_permission_check: >-
+      {{
+        passwd_stat.stat.pw_name == 'root' and
+        (passwd_stat.stat.mode | string | int(base=8)) <= 644
+      }}
+  ignore_errors: yes
+
+- name: /etc/passwd 소유권 및 권한 검사 결과를 기반으로 scan_results 설정
+  set_fact:
+    scan_results: "{{ scan_results | combine({
+                      'U_08': passwd_owner_permission_check | bool
+                    }) }}"
+  ignore_errors: yes
+

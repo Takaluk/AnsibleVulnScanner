@@ -1,0 +1,42 @@
+---
+- name: Ping and check OS
+  hosts: all
+  gather_facts: yes
+  tasks:
+    - name: Ping Linux hosts
+      ping:
+      register: linux_ping_result
+      when: ansible_facts['os_family'] != 'Windows'
+      ignore_unreachable: yes
+      ignore_errors: yes
+
+    - name: Ping Windows hosts
+      win_ping:
+      register: windows_ping_result
+      when: ansible_facts['os_family'] == 'Windows'
+      ignore_unreachable: yes
+      ignore_errors: yes
+
+    - name: Set OS fact for Linux hosts
+      set_fact:
+        os_family: "{{ ansible_facts['os_family'] }}"
+        os_version: "{{ ansible_facts['distribution_version'] }}"
+      when: linux_ping_result.ping is defined
+
+    - name: Set OS fact for Windows hosts
+      set_fact:
+        os_family: "{{ ansible_facts['os_family'] }}"
+        os_version: "{{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}"
+      when: windows_ping_result.ping is defined
+
+    - name: Print connection status and details for Linux
+      debug:
+        msg: "{{ inventory_hostname }} | IP: {{ ansible_host }} | Status: {{ 'Connected' if linux_ping_result.ping is defined else 'Disconnected' }} | OS: {{ os_family }} | Version: {{ os_version }}"
+      when: ansible_facts['os_family'] != 'Windows'
+      ignore_errors: yes
+
+    - name: Print connection status and details for Windows
+      debug:
+        msg: "{{ inventory_hostname }} | IP: {{ ansible_host }} | Status: {{ 'Connected' if windows_ping_result.ping is defined else 'Disconnected' }} | OS: {{ os_family }} | Version: {{ os_version }}"
+      when: ansible_facts['os_family'] == 'Windows'
+      ignore_errors: yes

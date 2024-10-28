@@ -1,0 +1,54 @@
+---
+- name: /etc/crontab 파일이 존재하는지 확인
+  stat:
+    path: /etc/crontab
+  register: crontab_stat
+  ignore_errors: yes
+
+- name: /etc/cron.allow 파일이 존재하는지 확인
+  stat:
+    path: /etc/cron.allow
+  register: cron_allow_stat
+  ignore_errors: yes
+
+- name: /etc/cron.deny 파일이 존재하는지 확인
+  stat:
+    path: /etc/cron.deny
+  register: cron_deny_stat
+  ignore_errors: yes
+
+- name: 확인할 cron 파일 결정 (/etc/crontab, /etc/cron.allow 또는 /etc/cron.deny)
+  set_fact:
+    cron_file: >-
+      {{
+        '/etc/crontab' if crontab_stat.stat.exists else
+        '/etc/cron.allow' if cron_allow_stat.stat.exists else
+        '/etc/cron.deny' if cron_deny_stat.stat.exists else None
+      }}
+  when: crontab_stat.stat.exists or cron_allow_stat.stat.exists or cron_deny_stat.stat.exists
+  ignore_errors: yes
+
+- name: 선택한 cron 파일의 소유권 및 권한 확인
+  stat:
+    path: "{{ cron_file }}"
+  register: selected_cron_stat
+  when: crontab_stat.stat.exists or cron_allow_stat.stat.exists or cron_deny_stat.stat.exists
+  ignore_errors: yes
+
+- name: 선택한 cron 파일의 소유자가 root이고 권한이 640 이하인지 확인
+  set_fact:
+    cron_owner_permission_check: >-
+      {{
+        selected_cron_stat.stat.pw_name == 'root' and
+        selected_cron_stat.stat.mode | int(base=8) <= 640
+      }}
+  when: crontab_stat.stat.exists or cron_allow_stat.stat.exists or cron_deny_stat.stat.exists
+  ignore_errors: yes
+
+- name: cron 파일의 소유권 및 권한 검사 결과를 기반으로 scan_results 설정
+  set_fact:
+    scan_results: "{{ scan_results | combine({
+                      'U_19': (cron_owner_permission_check | bool) if (crontab_stat.stat.exists or cron_allow_stat.stat.exists or cron_deny_stat.stat.exists) else false
+                    }) }}"
+  ignore_errors: yes
+

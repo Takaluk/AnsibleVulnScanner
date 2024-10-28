@@ -1,0 +1,19 @@
+---
+- name: SAM 파일 ACL 가져오기
+  win_shell: icacls C:\Windows\System32\config\SAM
+  register: sam_acl
+  ignore_errors: yes
+
+- name: 관리자와 시스템만 전체 제어 권한이 있는지 확인
+  set_fact:
+    scan_results: >-
+      {{
+        scan_results | combine({
+          'W_25': (
+            (sam_acl.stdout is search('BUILTIN\\Administrators:\\(F\\)')) and
+            (sam_acl.stdout is search('NT AUTHORITY\\SYSTEM:\\(F\\)')) and
+            not (sam_acl.stdout is search('^(?!.*(BUILTIN\\Administrators|NT AUTHORITY\\SYSTEM)).*:\\(F\\)'))
+          ) | ternary(true, false)
+        })
+      }}
+  ignore_errors: yes

@@ -1,0 +1,32 @@
+- name: /etc/pam.d/system-auth 파일이 존재하는지 확인
+  stat:
+    path: /etc/pam.d/system-auth
+  register: system_auth_stat
+  ignore_errors: yes
+
+- name: /etc/pam.d/system-auth 파일에서 deny 설정 확인
+  shell: grep -E 'deny=[0-5]' /etc/pam.d/system-auth || true
+  register: system_auth_deny
+  when: system_auth_stat.stat.exists
+  ignore_errors: yes
+
+- name: /etc/pam.d/password-auth 파일이 존재하는지 확인
+  stat:
+    path: /etc/pam.d/password-auth
+  register: password_auth_stat
+  ignore_errors: yes
+
+- name: /etc/pam.d/password-auth 파일에서 deny 설정 확인
+  shell: grep -E 'deny=[0-5]' /etc/pam.d/password-auth || true
+  register: password_auth_deny
+  when: password_auth_stat.stat.exists
+  ignore_errors: yes
+
+- name: system-auth 및 password-auth 파일의 deny 설정을 기반으로 scan_results 설정
+  set_fact:
+    scan_results: "{{ scan_results | combine({
+                      'U_03': (system_auth_deny.stdout is defined and system_auth_deny.stdout != '') and
+                              (password_auth_deny.stdout is defined and password_auth_deny.stdout != '')
+                    }) }}"
+  ignore_errors: yes
+

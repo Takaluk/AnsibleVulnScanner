@@ -1,0 +1,25 @@
+- name: 시스템 종료 로컬 보안 정책 가져오기
+  win_shell: |
+    secedit /export /cfg C:\Windows\Temp\secpol.cfg
+    Select-String -Path C:\Windows\Temp\secpol.cfg -Pattern "SeRemoteShutdownPrivilege"
+  register: shutdown_policy
+  ignore_errors: yes
+
+- name: 관리자만 정책을 가지고 있는지 확인
+  set_fact:
+    scan_results: >-
+      {{
+        scan_results | combine({
+          'W_28': (
+            shutdown_policy.stdout | regex_search('^SeRemoteShutdownPrivilege = BUILTIN\\Administrators$') is not none
+          )
+        })
+      }}
+  ignore_errors: yes
+
+- name: 내보낸 정책 파일 정리
+  win_file:
+    path: C:\Windows\Temp\secpol.cfg
+    state: absent
+  ignore_errors: yes
+

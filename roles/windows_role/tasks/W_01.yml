@@ -1,0 +1,12 @@
+---
+- name: Administrator 계정 존재 여부 확인
+  win_shell: |
+    if (Get-LocalUser -Name 'Administrator' -ErrorAction SilentlyContinue) { Write-Output 'false' } else { Write-Output 'true' }
+  register: admin_account_check
+  ignore_errors: yes
+
+- name: 계정 존재 여부에 따른 scan_result 설정
+  set_fact:
+    scan_results: "{{ scan_results | combine({ 'W_01': (admin_account_check.stdout == 'true') }) }}"
+  ignore_errors: yes
+

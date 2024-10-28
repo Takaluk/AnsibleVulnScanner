@@ -1,0 +1,19 @@
+- name: restrictanonymous 레지스트리 값 확인
+  win_shell: |
+    $value = (Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa' -Name 'restrictanonymous').restrictanonymous
+    Write-Output $value
+  register: restrict_anonymous
+  ignore_errors: yes
+
+- name: restrictanonymoussam 레지스트리 값 확인
+  win_shell: |
+    $value = (Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa' -Name 'restrictanonymoussam').restrictanonymoussam
+    Write-Output $value
+  register: restrict_anonymous_sam
+  ignore_errors: yes
+
+- name: 두 레지스트리 값이 모두 1인지 확인
+  set_fact:
+    scan_results: "{{ scan_results | combine({'W_30': (restrict_anonymous.stdout.strip() == '1' and restrict_anonymous_sam.stdout.strip() == '1')}) }}"
+  ignore_errors: yes
+

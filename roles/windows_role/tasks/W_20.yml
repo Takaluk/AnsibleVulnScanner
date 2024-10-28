@@ -1,0 +1,12 @@
+---
+- name: 최신 핫픽스 확인
+  win_updates:
+    category_names: ['CriticalUpdates', 'SecurityUpdates']
+    state: searched
+  register: update_check
+  ignore_errors: yes
+
+- name: 최신 핫픽스 설치 여부 확인
+  set_fact:
+    scan_results: "{{ scan_results | combine({'W_20': (update_check.updates | length == 0)}) }}"
+  ignore_errors: yes

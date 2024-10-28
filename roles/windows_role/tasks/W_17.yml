@@ -1,0 +1,13 @@
+---
+- name: DNS 서비스 구동 여부 확인
+  win_shell: |
+    $service = Get-Service -Name "DNS" -ErrorAction SilentlyContinue
+    if ($service.Status -ne 'Running') { Write-Output 'true' }
+    else { Write-Output 'false' }
+  register: dns_service_check
+  ignore_errors: yes
+
+- name: DNS 서비스 상태를 scan_result에 설정
+  set_fact:
+    scan_results: "{{ scan_results | combine({ 'W_17': (dns_service_check.stdout == 'true') }) }}"
+  ignore_errors: yes

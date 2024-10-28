@@ -1,0 +1,23 @@
+---
+- name: ShutdownWithoutLogon 레지스트리 값 가져오기
+  win_shell: |
+    try {
+      $value = Get-ItemProperty -Path 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'ShutdownWithoutLogon'
+      Write-Output $value.ShutdownWithoutLogon
+    } catch {
+      Write-Output "NotFound"
+    }
+  register: shutdown_without_logon
+  ignore_errors: yes
+
+- name: ShutdownWithoutLogon 값이 0인지 확인
+  set_fact:
+    scan_results: >-
+      {{
+        scan_results | combine({
+          'W_27': (
+            shutdown_without_logon.stdout == '0'
+          )
+        })
+      }}
+  ignore_errors: yes

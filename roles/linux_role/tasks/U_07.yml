@@ -1,0 +1,18 @@
+- name: 유효한 소유자 또는 그룹이 없는 파일과 디렉터리 찾기
+  shell: "find / -nogroup -o -nouser 2>/dev/null"
+  register: invalid_owner_group_files
+  failed_when: false
+  ignore_errors: yes
+
+- name: 유효한 소유자 또는 그룹이 없는 파일이나 디렉터리가 있는지 확인
+  set_fact:
+    has_invalid_owner_group: "{{ invalid_owner_group_files.stdout is defined and invalid_owner_group_files.stdout != '' }}"
+  ignore_errors: yes
+
+- name: 유효하지 않은 소유자 또는 그룹 검사 결과를 기반으로 scan_results 설정
+  set_fact:
+    scan_results: "{{ scan_results | combine({
+                      'U_07': not has_invalid_owner_group | bool
+                    }) }}"
+  ignore_errors: yes
+

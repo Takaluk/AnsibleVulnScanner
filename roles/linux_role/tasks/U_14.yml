@@ -1,0 +1,17 @@
+- name: SUID 또는 SGID가 설정된 /bin 디렉토리의 모든 파일 찾기
+  shell: find /bin -perm /6000
+  register: suid_sgid_files
+  ignore_errors: yes
+
+- name: SUID 또는 SGID가 설정된 파일이 있는지 확인
+  set_fact:
+    suid_sgid_check: "{{ suid_sgid_files.stdout == '' }}"
+  ignore_errors: yes
+
+- name: 주요 실행 파일의 SUID 및 SGID 검사 결과를 기반으로 scan_results 설정
+  set_fact:
+    scan_results: "{{ scan_results | combine({
+                      'U_14': suid_sgid_check | bool
+                    }) }}"
+  ignore_errors: yes
+

@@ -1,0 +1,44 @@
+---
+- name: ScreenSaveActive 레지스트리 값 확인
+  win_shell: |
+    try {
+      $ScreenSaveActive = (Get-ItemProperty -Path 'HKCU:\Control Panel\Desktop' -Name 'ScreenSaveActive' -ErrorAction Stop).ScreenSaveActive
+      Write-Output $ScreenSaveActive
+    } catch {
+      Write-Output "NotFound"
+    }
+  register: screensave_active
+  ignore_errors: yes
+
+- name: ScreenSaverIsSecure 레지스트리 값 확인
+  win_shell: |
+    try {
+      $ScreenSaverlSecure = (Get-ItemProperty -Path 'HKCU:\Control Panel\Desktop' -Name 'ScreenSaverIsSecure' -ErrorAction Stop).ScreenSaverIsSecure
+      Write-Output $ScreenSaverlSecure
+    } catch {
+      Write-Output "NotFound"
+    }
+  register: screensaver_secure
+  ignore_errors: yes
+
+- name: ScreenSaveTimeOut 레지스트리 값 확인
+  win_shell: |
+    try {
+      $ScreenSaveTimeOut = (Get-ItemProperty -Path 'HKCU:\Control Panel\Desktop' -Name 'ScreenSaveTimeOut' -ErrorAction Stop).ScreenSaveTimeOut
+      Write-Output $ScreenSaveTimeOut
+    } catch {
+      Write-Output "NotFound"
+    }
+  register: screensave_timeout
+  ignore_errors: yes
+  
+- name: 화면 보호기 활성화 여부 결정
+  set_fact:
+    scan_results: "{{ scan_results | combine({
+      'W_26': (
+        screensave_active.stdout.strip() == '1' and
+        screensaver_secure.stdout.strip() == '1' and
+        screensave_timeout.stdout.strip() != 'NotFound'
+      )
+    }) }}"
+  ignore_errors: yes

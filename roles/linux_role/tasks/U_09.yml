@@ -1,0 +1,22 @@
+- name: /etc/shadow의 소유권과 권한 확인
+  stat:
+    path: /etc/shadow
+  register: shadow_stat
+  ignore_errors: yes
+
+- name: /etc/shadow의 소유자가 root이고 권한이 400 이하인지 확인
+  set_fact:
+    shadow_owner_permission_check: >-
+      {{
+        shadow_stat.stat.pw_name == 'root' and
+        shadow_stat.stat.mode | int(base=8) <= 400
+      }}
+  ignore_errors: yes
+
+- name: /etc/shadow 소유권 및 권한 검사 결과를 기반으로 scan_results 설정
+  set_fact:
+    scan_results: "{{ scan_results | combine({
+                      'U_09': shadow_owner_permission_check | bool
+                    }) }}"
+  ignore_errors: yes
+

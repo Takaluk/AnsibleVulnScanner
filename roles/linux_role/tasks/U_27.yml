@@ -1,0 +1,25 @@
+- name: Check if rpcbind service is active
+  ansible.builtin.shell: systemctl is-active rpcbind || true
+  register: rpcbind_status
+  ignore_errors: yes
+
+- name: Evaluate rpcbind service status
+  set_fact:
+    rpcbind_active: "{{ rpcbind_status.stdout == 'active' }}"
+
+- name: Stop rpcbind service if active
+  ansible.builtin.systemd:
+    name: rpcbind
+    state: stopped
+  when: rpcbind_active
+
+- name: Disable rpcbind service to prevent startup
+  ansible.builtin.systemd:
+    name: rpcbind
+    enabled: false
+  when: rpcbind_active
+
+- name: Set scan_results based on rpcbind service status
+  set_fact:
+    scan_results: "{{ scan_results | combine({'U_27': not rpcbind_active}) }}"
+

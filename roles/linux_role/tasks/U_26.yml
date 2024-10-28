@@ -1,0 +1,16 @@
+- name: Check if automountd service is running
+  ansible.builtin.shell: ps -ef | grep automountd | grep -v grep || true
+  register: automountd_status
+  ignore_errors: yes
+
+- name: Evaluate automountd service status
+  set_fact:
+    automountd_running: "{{ automountd_status.stdout != '' }}"
+
+- name: Evaluate all conditions for automountd removal
+  set_fact:
+    all_conditions: "{{ not automountd_running }}"
+
+- name: Set scan_results based on automountd service status
+  set_fact:
+    scan_results: "{{ scan_results | combine({'U_26': all_conditions | bool}) }}"

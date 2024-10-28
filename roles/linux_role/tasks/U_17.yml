@@ -1,0 +1,43 @@
+- name: /etc/hosts.equiv 파일이 존재하는지 확인
+  stat:
+    path: /etc/hosts.equiv
+  register: hosts_equiv_stat
+  ignore_errors: yes
+
+- name: 홈 디렉터리에서 모든 .rhosts 파일 찾기
+  shell: "find /home -maxdepth 2 -type f -name '.rhosts'"
+  register: rhosts_files
+  ignore_errors: yes
+
+- name: hosts.equiv 및 .rhosts 검사 상태를 true로 초기화
+  set_fact:
+    hosts_rhosts_check: true
+  ignore_errors: yes
+
+- name: /etc/hosts.equiv 파일의 소유권, 권한 및 내용을 확인 (존재하는 경우)
+  set_fact:
+    hosts_rhosts_check: false
+  when: hosts_equiv_stat.stat.exists and (hosts_equiv_stat.stat.pw_name != 'root' or hosts_equiv_stat.stat.mode | int(base=8) > 600 or '+' in lookup('file', '/etc/hosts.equiv'))
+  ignore_errors: yes
+
+- name: 각 .rhosts 파일의 소유권, 권한 및 내용 확인 (존재하는 경우)
+  stat:
+    path: "{{ item }}"
+  loop: "{{ rhosts_files.stdout_lines }}"
+  register: rhosts_files_stat
+  ignore_errors: yes
+
+- name: 각 .rhosts 파일이 올바른 소유권, 권한을 가지고 있고 '+'가 없는지 확인
+  set_fact:
+    hosts_rhosts_check: false
+  loop: "{{ rhosts_files_stat.results }}"
+  when: item.stat.exists and (item.stat.pw_name not in [item.stat.path.split('/')[2], 'root'] or item.stat.mode | int(base=8) > 600 or '+' in lookup('file', item.stat.path))
+  ignore_errors: yes
+
+- name: hosts.equiv 및 .rhosts 파일 검사 결과를 기반으로 scan_results 설정
+  set_fact:
+    scan_results: "{{ scan_results | combine({
+                      'U_17': hosts_rhosts_check | bool
+                    }) }}"
+  ignore_errors: yes
+

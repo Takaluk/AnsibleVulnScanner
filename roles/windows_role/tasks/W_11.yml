@@ -1,0 +1,47 @@
+---
+- name: Alerter 서비스 구동 여부 확인
+  win_shell: |
+    $service = Get-Service -Name "Alerter"
+    if ($service.Status -eq 'Stopped') { Write-Output 'true' }
+    else { Write-Output 'false' }
+  register: alerter_service
+  ignore_errors: yes
+
+- name: Clipbook 서비스 구동 여부 확인
+  win_shell: |
+    $service = Get-Service -Name "Clipbook"
+    if ($service.Status -eq 'Stopped') { Write-Output 'true' }
+    else { Write-Output 'false' }
+  register: clipbook_service
+  ignore_errors: yes
+
+- name: Messenger 서비스 구동 여부 확인
+  win_shell: |
+    $service = Get-Service -Name "Messenger"
+    if ($service.Status -eq 'Stopped') { Write-Output 'true' }
+    else { Write-Output 'false' }
+  register: messenger_service
+  ignore_errors: yes
+
+- name: Simple TCP/IP Services 서비스 구동 여부 확인
+  win_shell: |
+    $service = Get-Service -Name "SimpTcp"
+    if ($service.Status -eq 'Stopped') { Write-Output 'true' }
+    else { Write-Output 'false' }
+  register: simpl_tcp_service
+  ignore_errors: yes
+
+- name: 모든 서비스 상태를 확인하고 scan_result 설정
+  set_fact:
+    scan_results: >
+      {{
+        scan_results | combine({
+          'W_11': (
+            alerter_service.stdout == 'true' and
+            clipbook_service.stdout == 'true' and
+            messenger_service.stdout == 'true' and
+            simpl_tcp_service.stdout == 'true'
+          )
+        })
+      }}
+  ignore_errors: yes

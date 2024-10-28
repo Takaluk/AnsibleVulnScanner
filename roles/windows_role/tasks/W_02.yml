@@ -1,0 +1,11 @@
+---
+- name: Guest 계정 활성/비활성 여부 확인
+  win_shell: |
+    if ((Get-LocalUser -Name 'Guest' -ErrorAction SilentlyContinue).Enabled -eq $false) { Write-Output 'true' } else { Write-Output 'false' }
+  register: guest_account_check
+  ignore_errors: yes
+
+- name: Guest 계정 상태에 따른 scan_result 설정
+  set_fact:
+    scan_results: "{{ scan_results | combine({ 'W_02': (guest_account_check.stdout == 'true') }) }}"
+  ignore_errors: yes

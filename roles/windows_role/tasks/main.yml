@@ -1,1 +1,178 @@
 ---
+# main.yml에서 다른 태스크 파일들을 명시적으로 호출
+
+- name: Set var for windows_role
+  set_fact:
+    scan_results: {}
+
+- name: W_01
+  include_tasks: W_01.yml
+  tags:
+    - W_01
+
+- name: W_02
+  include_tasks: W_02.yml
+  tags:
+    - W_02
+
+- name: W_03
+  include_tasks: W_03.yml
+  tags:
+    - W_03
+
+- name: W_04
+  include_tasks: W_04.yml
+  tags:
+    - W_04
+
+- name: W_05
+  include_tasks: W_05.yml
+  tags:
+    - W_05
+
+- name: W_06
+  include_tasks: W_06.yml
+  tags:
+    - W_06
+
+- name: W_07
+  include_tasks: W_07.yml
+  tags:
+    - W_07
+
+- name: W_08
+  include_tasks: W_08.yml
+  tags:
+    - W_08
+
+- name: W_09
+  include_tasks: W_09.yml
+  tags:
+    - W_09
+
+- name: W_10
+  include_tasks: W_10.yml
+  tags:
+    - W_10
+
+- name: W_11
+  include_tasks: W_11.yml
+  tags:
+    - W_11
+
+- name: W_12
+  include_tasks: W_12.yml
+  tags:
+    - W_12
+
+- name: W_13
+  include_tasks: W_13.yml
+  tags:
+    - W_13
+
+- name: W_14
+  include_tasks: W_14.yml
+  tags:
+    - W_14
+
+- name: W_15
+  include_tasks: W_15.yml
+  tags:
+    - W_15
+
+- name: W_16
+  include_tasks: W_16.yml
+  tags:
+    - W_16
+
+- name: W_17
+  include_tasks: W_17.yml
+  tags:
+    - W_17
+
+- name: W_18
+  include_tasks: W_18.yml
+  tags:
+    - W_18
+
+- name: W_19
+  include_tasks: W_19.yml
+  tags:
+    - W_19
+
+- name: W_20
+  include_tasks: W_20.yml
+  tags:
+    - W_20
+
+- name: W_21
+  include_tasks: W_21.yml
+  tags:
+    - W_21
+
+- name: W_22
+  include_tasks: W_22.yml
+  tags:
+    - W_22
+
+- name: W_23
+  include_tasks: W_23.yml
+  tags:
+    - W_23
+
+- name: W_24
+  include_tasks: W_24.yml
+  tags:
+    - W_24
+
+- name: W_25
+  include_tasks: W_25.yml
+  tags:
+    - W_25
+
+- name: W_26
+  include_tasks: W_26.yml
+  tags:
+    - W_26
+
+- name: W_27
+  include_tasks: W_27.yml
+  tags:
+    - W_27
+
+- name: W_28
+  include_tasks: W_28.yml
+  tags:
+    - W_28
+
+- name: W_29
+  include_tasks: W_29.yml
+  tags:
+    - W_29
+
+- name: W_30
+  include_tasks: W_30.yml
+  tags:
+    - W_30
+
+- name: W_31
+  include_tasks: W_31.yml
+  tags:
+    - W_31
+
+- name: W_32
+  include_tasks: W_32.yml
+  tags:
+    - W_32
+
+- name: Write scan_results to a file on the control node
+  local_action:
+    module: copy
+    content: |
+      {
+        "hostname": "{{ inventory_hostname }}",
+        "scan_results": {{ scan_results | to_nice_json }}
+      }
+    dest: "/AnsibleVulnScanner/scan_results/{{ inventory_hostname }}_scan_results.json"
+  delegate_to: localhost
+  become: true

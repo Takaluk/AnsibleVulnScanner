@@ -1,0 +1,32 @@
+- name: /home 디렉터리에서 사용자 환경 파일(.bashrc, .profile) 찾기
+  shell: "find /home -maxdepth 2 -type f -name '.bashrc' -o -name '.profile'"
+  register: env_files
+  ignore_errors: yes
+
+- name: 각 환경 파일의 소유권과 권한 확인
+  stat:
+    path: "{{ item }}"
+  loop: "{{ env_files.stdout_lines }}"
+  register: env_files_stat
+  ignore_errors: yes
+
+- name: 환경 파일 검사 상태를 true로 초기화
+  set_fact:
+    env_files_check: true
+  ignore_errors: yes
+
+- name: 각 환경 파일의 소유권과 권한 유효성 검사
+  set_fact:
+    env_files_check: false
+  loop: "{{ env_files_stat.results }}"
+  when: item.stat.exists is defined and item.stat.exists and
+        (item.stat.pw_name not in ['root', item.stat.path.split('/')[-2]] or item.stat.mode | int(base=8) != 644)
+  ignore_errors: yes
+
+- name: 환경 파일의 소유권 및 권한 검사 결과를 기반으로 scan_results 설정
+  set_fact:
+    scan_results: "{{ scan_results | combine({
+                      'U_15': env_files_check | bool
+                    }) }}"
+  ignore_errors: yes
+
