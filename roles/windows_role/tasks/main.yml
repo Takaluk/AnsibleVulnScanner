@@ -164,6 +164,7 @@
   include_tasks: W_32.yml
   tags:
     - W_32
+
 - name: Write scan_results to a file on the control node
   local_action:
     module: copy
@@ -174,4 +175,4 @@
       }
     dest: "/AnsibleVulnScanner/scan_results/{{ inventory_hostname }}_scan_results.json"
   delegate_to: localhost
-
+  become: true

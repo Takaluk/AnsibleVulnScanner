@@ -1,2 +1,8 @@
-localhost ansible_user=devops ansible_become=true
-10.0.2.15 ansible_user=administrator ansible_password=1q2w3e4r!!@ ansible_connection=winrm ansible_winrm_transport=basic ansible_winrm_server_cert_validation=ignore
+LinuxServer1 ansible_host=localhost ansible_user=devops ansible_become=true
+
+LinuxServer2 ansible_host=10.0.2.16 ansible_user=devops ansible_become=true
+LinuxServer3 ansible_host=10.0.2.15 ansible_user=devops ansible_become=true
+
+WindowsServer1 ansible_host=10.0.2.13 ansible_user=administrator ansible_password=1q2w3e4r!!@ ansible_connection=winrm ansible_winrm_transport=basic ansible_winrm_server_cert_validation=ignore
+
+WindowsServer2 ansible_host=10.0.2.14 ansible_user=new_user1 ansible_password=1q2w3e4r!!@ ansible_connection=winrm ansible_winrm_transport=basic ansible_winrm_server_cert_validation=ignore

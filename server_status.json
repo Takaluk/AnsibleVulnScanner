@@ -1,6 +1,6 @@
 [
     {
-        "name": "localhost",
+        "name": "LinuxServer1",
         "ip": "localhost",
         "status": "Connected",
         "os": "Debian",
@@ -10,13 +10,43 @@
         "manager": "\uae40\uc724\uc8fc"
     },
     {
-        "name": "10.0.2.15",
-        "ip": "10.0.2.15",
+        "name": "LinuxServer2",
+        "ip": "10.0.2.16",
         "status": "Connected",
-        "os": "Windows",
-        "version": "Microsoft Windows Server 2019 Standard 10.0.17763.0",
+        "os": "RedHat",
+        "version": "9.2",
         "security_level": "Low",
         "department": "\ub0b4\ube44\ud488\uc9c8\uc2e4",
         "manager": "\uc548\uc8fc\ud604"
+    },
+    {
+        "name": "LinuxServer3",
+        "ip": "10.0.2.15",
+        "status": "Connected",
+        "os": "RedHat",
+        "version": "9.2",
+        "security_level": "High",
+        "department": "\ub0b4\ube44\ud488\uc9c8\uc2e4",
+        "manager": "\uc774\uc218\ud615"
+    },
+    {
+        "name": "WindowsServer1",
+        "ip": "10.0.2.13",
+        "status": "Connected",
+        "os": "Windows",
+        "version": "Microsoft Windows Server 2019 Standard 10.0.17763.0",
+        "security_level": "High",
+        "department": "\ub0b4\ube44\ud488\uc9c8\uc2e4",
+        "manager": "\uc774\ub3c4\ud6c8"
+    },
+    {
+        "name": "WindowsServer2",
+        "ip": "10.0.2.14",
+        "status": "Connected",
+        "os": "Windows",
+        "version": "Microsoft Windows Server 2019 Standard 10.0.17763.0",
+        "security_level": "Medium",
+        "department": "\uace0\uac1d\uc9c0\uc6d0\uc2e4",
+        "manager": "\uc774\uc735\uc131"
     }
 ]

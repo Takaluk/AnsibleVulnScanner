@@ -1,4 +1,3 @@
----
 - name: net share 명령어 실행
   win_shell: net share
   register: net_share_output
@@ -11,9 +10,10 @@
         | select('search', '^(?!C\$|D\$|Admin\$|IPC\$)\w')
         | list
       }}
-	ignore_errors: yes
-	
+  ignore_errors: yes
+
 - name: 일반 공유 디렉터리 존재 여부 확인
   set_fact:
     scan_results: "{{ scan_results | combine({ 'W_09': (general_shares | length == 0) }) }}"
-	ignore_errors: yes
+  ignore_errors: yes
+

@@ -40,4 +40,3 @@
         msg: "{{ inventory_hostname }} | IP: {{ ansible_host }} | Status: {{ 'Connected' if windows_ping_result.ping is defined else 'Disconnected' }} | OS: {{ os_family }} | Version: {{ os_version }}"
       when: ansible_facts['os_family'] == 'Windows'
       ignore_errors: yes
-

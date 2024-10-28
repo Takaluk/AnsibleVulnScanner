@@ -1,5 +1,4 @@
----
-- name: "시스템 종료" 로컬 보안 정책 가져오기
+- name: 시스템 종료 로컬 보안 정책 가져오기
   win_shell: |
     secedit /export /cfg C:\Windows\Temp\secpol.cfg
     Select-String -Path C:\Windows\Temp\secpol.cfg -Pattern "SeRemoteShutdownPrivilege"
@@ -23,3 +22,4 @@
     path: C:\Windows\Temp\secpol.cfg
     state: absent
   ignore_errors: yes
+

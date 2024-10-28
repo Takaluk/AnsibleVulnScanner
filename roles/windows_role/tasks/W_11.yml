@@ -36,7 +36,7 @@
     scan_results: >
       {{
         scan_results | combine({
-          'services_check': (
+          'W_11': (
             alerter_service.stdout == 'true' and
             clipbook_service.stdout == 'true' and
             messenger_service.stdout == 'true' and

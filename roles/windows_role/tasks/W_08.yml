@@ -1,4 +1,3 @@
----
 - name: Administrators 그룹의 사용자 목록 가져오기
   win_shell: Get-LocalGroupMember -Group "Administrators"
   register: admin_group_members
@@ -12,16 +11,11 @@
 - name: 불필요한 관리자 계정 확인
   set_fact:
     unnecessary_admins_exist: >
-      {{
-        admin_group_members.stdout_lines
-        | map('regex_replace', '^.*\\\\([^\\\\]+)$', '\\1')
-        | difference(essential_admins)
-        | list
-        | length > 0
-      }}
+      {{ admin_group_members | map(attribute='name') | difference(essential_admins) | list | length > 0 }}
   ignore_errors: yes
 
 - name: 설정 확인 및 scan_result 업데이트
   set_fact:
     scan_results: "{{ scan_results | combine({ 'W_08': unnecessary_admins_exist }) }}"
-  ignore_errors: ye
+  ignore_errors: yes
+

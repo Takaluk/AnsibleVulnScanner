@@ -1,17 +1,16 @@
----
 - name: AutoShareServer 값 확인
   win_shell: |
     $autoShareServer = (Get-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\LanmanServer\\Parameters').AutoShareServer
     if ($autoShareServer -eq 0) { Write-Output 'true' }
     else { Write-Output 'false' }
   register: auto_share_server_check
-	ignore_errors: yes
-	
+  ignore_errors: yes
+
 - name: 기본 공유 디렉터리 확인
   win_shell: net share
   register: net_share_output
-	ignore_errors: yes
-	
+  ignore_errors: yes
+
 - name: 기본 공유 디렉터리 필터링
   set_fact:
     basic_shares_exist: >
@@ -21,9 +20,10 @@
         | list
         | length > 0
       }}
-	ignore_errors: yes
-	
+  ignore_errors: yes
+
 - name: 기본 공유 및 AutoShareServer 값 확인
   set_fact:
     scan_results: "{{ scan_results | combine({ 'W_10': (auto_share_server_check.stdout == 'true' and not basic_shares_exist) }) }}"
   ignore_errors: yes
+

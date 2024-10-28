@@ -1,14 +1,32 @@
 [
     {
-        "hostname": "localhost",
+        "hostname": "LinuxServer1",
         "security_level": "Medium",
         "department": "경영지원실",
         "manager": "김윤주"
     },
     {
-        "hostname": "10.0.2.15",
+        "hostname": "LinuxServer2",
         "security_level": "Low",
         "department": "내비품질실",
         "manager": "안주현"
+    },
+    {
+        "hostname": "LinuxServer3",
+        "security_level": "High",
+        "department": "내비품질실",
+        "manager": "이수형"
+    },
+    {
+        "hostname": "WindowsServer1",
+        "security_level": "High",
+        "department": "내비품질실",
+        "manager": "이도훈"
+    },
+        {
+        "hostname": "WindowsServer2",
+        "security_level": "Medium",
+        "department": "고객지원실",
+        "manager": "이융성"
     }
 ]
